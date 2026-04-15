@@ -1,0 +1,212 @@
+/**
+ * 7bet.lt - Convert CSS
+ * Last Played Games Section Styles
+ * Matches Figma design: nodes 2190:9, 2190:13, 2190:16
+ * Add this to Convert experience CSS or global CSS
+ */
+
+/* Section container - right-aligned compact panel */
+.last-played-section {
+  max-width: 500px;
+  margin-left: auto;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* === Notification Banner (top bar) === */
+
+.last-played-notification {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Green checkmark area - Figma: bg #18ae62, rounded-tl 4px */
+.last-played-notification-icon {
+  background: #18ae62;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+/* Dark text bar - Figma: bg #1c1e26, border-bottom 1.5px #18ae62 */
+.last-played-notification-content {
+  background: #1c1e26;
+  border-bottom: 1.5px solid #18ae62;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Notification text - Figma: Inter Regular 12px white */
+.last-played-notification-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: normal;
+  color: #ffffff;
+  flex: 1;
+}
+
+/* Close button - X icon */
+.last-played-notification-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.last-played-notification-close:hover {
+  opacity: 1;
+}
+
+/* === Last Played Body (white area below notification) === */
+
+.last-played-body {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+/* Header */
+.last-played-header {
+  display: flex;
+  align-items: center;
+  padding-top: 16px;
+}
+
+/* Title - Figma: Poppins Bold 12px uppercase #2b2e3b */
+.last-played-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: normal;
+  color: #2b2e3b;
+  text-transform: uppercase;
+}
+
+/* Games row */
+.last-played-games {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding-bottom: 20px;
+}
+
+/* Game card */
+.last-played-card {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+.last-played-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+}
+
+/* Thumbnail - Figma: 75px height, 4px radius */
+.last-played-card-thumb {
+  position: relative;
+  height: 75px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.last-played-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Hover overlay - Figma: rgba(24,25,31,0.8) */
+.last-played-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(24, 25, 31, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+}
+
+.last-played-card-link:hover .last-played-card-overlay {
+  opacity: 1;
+}
+
+/* Play button - Figma: #18ae62, Poppins Bold 12px, white, 4px radius */
+.last-played-play-btn {
+  background: #18ae62;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Game name - Figma: Poppins Medium 12px #3a3e4e, ellipsis */
+.last-played-card-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: normal;
+  color: #3a3e4e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .last-played-section {
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .last-played-body {
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .last-played-games {
+    gap: 12px;
+    padding-bottom: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .last-played-card {
+    flex: 0 0 80px;
+  }
+
+  .last-played-card-thumb {
+    height: 62px;
+  }
+
+  .last-played-card-name {
+    font-size: 11px;
+  }
+}

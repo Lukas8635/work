@@ -1,0 +1,96 @@
+/* Stock Indicator Styles */
+
+/* Base stock indicator container */
+.stock-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "IQOS", sans-serif;
+  font-size: 12px;
+  line-height: normal;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* Stock indicator dot */
+.stock-indicator__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* In stock - green */
+.stock-indicator--in-stock .stock-indicator__dot {
+  background-color: #58C713;
+}
+
+.stock-indicator--in-stock .stock-indicator__text {
+  color: #fff;
+}
+.stock-indicator.pdp-stock-indicator.stock-indicator--in-stock{
+  margin: -11px 0 24px ;
+}
+
+.stock-indicator.stock-indicator--in-stock.homepage-product-card{
+  margin: 8px 0;
+}
+/* Limited stock - orange */
+.stock-indicator--limited-stock .stock-indicator__dot {
+  background-color: #FF8C00;
+}
+
+.stock-indicator--limited-stock .stock-indicator__text {
+  color: #fff;
+}
+
+/* Out of stock - red */
+.stock-indicator--out-of-stock .stock-indicator__dot {
+  background-color: #E63946;
+}
+
+.stock-indicator--out-of-stock .stock-indicator__text {
+  color: #E63946;
+}
+
+/* Homepage specific styles - darker background cards */
+.homepage-product-card .stock-indicator__text {
+  color: #fff;
+}
+
+/* PDP specific styles */
+.pdp-stock-indicator {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.pdp-stock-indicator .stock-indicator__dot {
+  width: 16px;
+  height: 16px;
+}
+
+.pdp-stock-indicator .stock-indicator__text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.pdp-stock-indicator.stock-indicator--out-of-stock .stock-indicator__text {
+  color: #E63946;
+}
+
+/* Animation for stock indicator appearance */
+.stock-indicator {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

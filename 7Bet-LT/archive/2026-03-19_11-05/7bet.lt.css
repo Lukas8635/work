@@ -1,0 +1,130 @@
+/* 7bet.lt — deposit variation styles */
+
+/* === Wrapper === */
+.dep-var-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  order: 5;
+  margin-bottom: 10px;
+}
+
+.deposit-container .deposit-form__amount--children--empty .input-underline {
+  display: none !important;
+}
+/* === Preset Buttons Row === */
+.dep-var-buttons-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+}
+.dep-var-btn {
+  flex: 1 0 0;
+  height: 48px;
+  background: #21232c;
+  color: #ffffff;
+  border: 1px solid #21232c;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 16px;
+  cursor: pointer;
+  padding: 16px 8px;
+  white-space: nowrap;
+  transition: 0.2s;
+  width: 100%;
+  min-width: auto;
+}
+
+.dep-var-btn:hover {
+  border-color: #18ae62;
+}
+
+/* €20 is always the wider default button */
+.dep-var-btn[data-dep-amount='20'] {
+  flex: 0 0 200px;
+  width: 200px;
+}
+
+.dep-var-btn--selected {
+  border-color: #18ae62;
+}
+
+/* === Kita Suma Row === */
+.dep-var-kita-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  align-self: flex-start;
+}
+
+.dep-var-kita-link {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #898fa9;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: normal;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+
+.dep-var-kita-link:hover {
+  color: #aab0c4;
+}
+
+.dep-var-kita-link--error {
+  color: #ff4b4b !important;
+}
+
+/* === Custom Amount Input === */
+.dep-var-custom-input {
+  height: 48px;
+  text-align: center;
+  background: #21232c;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: normal;
+  padding: 10px 9px;
+  outline: none;
+  width: 0;
+  min-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition:
+    width 0.2s ease,
+    opacity 0.2s ease,
+    border-color 0.15s ease;
+}
+
+.dep-var-custom-input--visible {
+  width: 210px;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: visible;
+}
+
+.dep-var-custom-input--error {
+  border-color: #ff4b4b;
+}
+
+.dep-var-custom-input:focus {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.dep-var-custom-input--error:focus {
+  border-color: #ff4b4b;
+}

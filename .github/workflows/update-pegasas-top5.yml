@@ -1,0 +1,34 @@
+name: Update Pegasas TOP 5
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # Kiekvieną dieną 6:00 UTC (8:00 Lietuva)
+  workflow_dispatch:       # Rankinis paleidimas per GitHub UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Scrape TOP 5
+        run: node pegasas/scrape-top5.js
+
+      - name: Commit updated top5.json
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add pegasas/top5.json pegasas/top5-seed.js
+          git diff --staged --quiet || git commit -m "Update Pegasas TOP 5 $(date -u +%Y-%m-%d)"
+          git push

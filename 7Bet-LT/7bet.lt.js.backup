@@ -1,0 +1,345 @@
+/**
+ * 7bet.lt - Last Played Games Section
+ * Shows recently played games from Frosmo.
+ * If user has fewer than 4 recent games, fills remaining slots with popular games.
+ */
+
+(function() {
+  'use strict';
+console.log('7bet.lt Last Played Games script loaded');
+  var CONFIG = {
+    maxGames: 4,
+    sectionTitle: 'Paskutiniai lošti',
+    notificationText: 'Įmoka apdorojama. Netrukus ją įskaitysime',
+    insertAfterSelector: '.nav-block',
+    fallbackInsertSelector: '.home-page__content',
+    checkInterval: 500,
+    maxAttempts: 30,
+    userCheckInterval: 2000
+  };
+
+  var lastLoginState = null;
+  var lastPathname = window.location.pathname;
+  var isInitialized = false;
+
+  function log(msg, data) {
+    if (data !== undefined) {
+      console.log('[7bet LP]', msg, data);
+    } else {
+      console.log('[7bet LP]', msg);
+    }
+  }
+
+  // --- User State ---
+
+  function isUserLoggedIn() {
+    var buttons = document.querySelectorAll('button');
+    for (var i = 0; i < buttons.length; i++) {
+      var text = buttons[i].textContent ? buttons[i].textContent.trim() : '';
+      if (text === 'Prisijungti' || text === 'Registruotis') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // --- Frosmo Helpers ---
+
+  function waitForFrosmo(callback, attempts) {
+    attempts = attempts || 0;
+    if (attempts >= CONFIG.maxAttempts) {
+      log('Frosmo not available after max attempts');
+      return;
+    }
+    if (typeof frosmo !== 'undefined' &&
+        frosmo.site &&
+        typeof frosmo.site.recentProducts === 'function' &&
+        frosmo.site.recommendations &&
+        typeof frosmo.site.recommendations.getProductApiData === 'function') {
+      callback();
+    } else {
+      setTimeout(function() { waitForFrosmo(callback, attempts + 1); }, CONFIG.checkInterval);
+    }
+  }
+
+  function getRecentlyViewedIds() {
+    try {
+      var recentProducts = frosmo.site.recentProducts();
+      if (Array.isArray(recentProducts) && recentProducts.length > 0) {
+        return recentProducts.slice(0, CONFIG.maxGames).map(function(item) {
+          return (typeof item === 'object' && item.id) ? item.id : item;
+        });
+      }
+    } catch (e) {
+      log('Error getting recent products', e);
+    }
+    return [];
+  }
+
+  function getTopViewedIds(limit) {
+    try {
+      if (typeof frosmo.site.topViewedProducts === 'function') {
+        var topProducts = frosmo.site.topViewedProducts();
+        if (Array.isArray(topProducts) && topProducts.length > 0) {
+          return topProducts.slice(0, limit).map(function(item) {
+            return (typeof item === 'object' && item.id) ? item.id : item;
+          });
+        }
+      }
+    } catch (e) {
+      log('Error getting top viewed products', e);
+    }
+    return [];
+  }
+
+  function getProductDetails(productIds) {
+    return frosmo.site.recommendations.getProductApiData(productIds);
+  }
+
+  // --- Data: Get 4 games (recent + popular fallback) ---
+
+  function getGamesData() {
+    var recentIds = getRecentlyViewedIds();
+    log('Recent game IDs:', recentIds);
+
+    if (recentIds.length >= CONFIG.maxGames) {
+      return getProductDetails(recentIds.slice(0, CONFIG.maxGames));
+    }
+
+    var remaining = CONFIG.maxGames - recentIds.length;
+    var popularIds = getTopViewedIds(CONFIG.maxGames + 10);
+    log('Popular game IDs:', popularIds);
+
+    // Filter out duplicates
+    var filteredPopular = popularIds.filter(function(id) {
+      return recentIds.indexOf(id) === -1;
+    }).slice(0, remaining);
+
+    var allIds = recentIds.concat(filteredPopular);
+    log('Combined IDs (' + recentIds.length + ' recent + ' + filteredPopular.length + ' popular):', allIds);
+
+    if (allIds.length === 0) {
+      return Promise.resolve([]);
+    }
+
+    return getProductDetails(allIds);
+  }
+
+  // --- DOM: Build HTML ---
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function createGameCard(product) {
+    var name = product.name || 'Unknown Game';
+    var image = (product.attributes && product.attributes.image) ||
+                (product.attributes && product.attributes.feedImage) || '';
+    var url = (product.attributes && product.attributes.url) || '#';
+
+    return '<div class="last-played-card">' +
+      '<a href="' + escapeHtml(url) + '" class="last-played-card-link">' +
+        '<div class="last-played-card-thumb">' +
+          '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" loading="lazy">' +
+          '<div class="last-played-card-overlay">' +
+            '<span class="last-played-play-btn">Lošti</span>' +
+          '</div>' +
+        '</div>' +
+        '<span class="last-played-card-name">' + escapeHtml(name) + '</span>' +
+      '</a>' +
+    '</div>';
+  }
+
+  function createNotificationBar() {
+    return '<div class="last-played-notification">' +
+      '<div class="last-played-notification-icon">' +
+        '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="15" cy="15" r="14" stroke="white" stroke-width="2" fill="none"/>' +
+          '<path d="M9 15.5L13 19.5L21 11.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+      '</div>' +
+      '<div class="last-played-notification-content">' +
+        '<span class="last-played-notification-text">' + CONFIG.notificationText + '</span>' +
+        '<button class="last-played-notification-close" aria-label="Uždaryti">' +
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M1 1L13 13M13 1L1 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>' +
+          '</svg>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function createSection(products) {
+    var cardsHtml = products.map(createGameCard).join('');
+    var notificationHtml = createNotificationBar();
+
+    return '<div class="last-played-section">' +
+      notificationHtml +
+      '<div class="last-played-body">' +
+        '<div class="last-played-header">' +
+          '<span class="last-played-title">' + CONFIG.sectionTitle + '</span>' +
+        '</div>' +
+        '<div class="last-played-games">' +
+          cardsHtml +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // --- DOM: Insert / Remove ---
+
+  function removeSection() {
+    var section = document.querySelector('.last-played-section');
+    if (section) {
+      section.remove();
+      return true;
+    }
+    return false;
+  }
+
+  function insertSection(html) {
+    if (document.querySelector('.last-played-section')) {
+      return false;
+    }
+
+    var temp = document.createElement('div');
+    temp.innerHTML = html;
+    var section = temp.firstElementChild;
+
+    // Primary: insert after .nav-block
+    var navBlock = document.querySelector(CONFIG.insertAfterSelector);
+    if (navBlock && navBlock.parentElement) {
+      navBlock.parentElement.insertBefore(section, navBlock.nextSibling);
+      bindCloseButton(section);
+      log('Section inserted after .nav-block');
+      return true;
+    }
+
+    // Fallback: insert at beginning of .home-page__content
+    var content = document.querySelector(CONFIG.fallbackInsertSelector);
+    if (content) {
+      content.insertBefore(section, content.firstChild);
+      bindCloseButton(section);
+      log('Section inserted in .home-page__content (fallback)');
+      return true;
+    }
+
+    log('Could not find insertion point');
+    return false;
+  }
+
+  function bindCloseButton(section) {
+    var closeBtn = section.querySelector('.last-played-notification-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        section.remove();
+      });
+    }
+  }
+
+  // --- DOM: Wait for element ---
+
+  function waitForElement(selector, callback, attempts) {
+    attempts = attempts || 0;
+    if (attempts >= CONFIG.maxAttempts) return;
+
+    if (document.querySelector(selector)) {
+      callback();
+    } else {
+      setTimeout(function() { waitForElement(selector, callback, attempts + 1); }, CONFIG.checkInterval);
+    }
+  }
+
+  // --- Main Init ---
+
+  function init() {
+    // Only run on homepage
+    if (window.location.pathname !== '/' && window.location.pathname !== '') {
+      return;
+    }
+
+    if (!isUserLoggedIn()) {
+      removeSection();
+      return;
+    }
+
+    getGamesData()
+      .then(function(products) {
+        if (products && products.length > 0) {
+          var sectionHtml = createSection(products);
+          waitForElement(CONFIG.insertAfterSelector, function() {
+            insertSection(sectionHtml);
+          });
+        }
+      })
+      .catch(function(err) {
+        log('Error fetching game data', err);
+      });
+  }
+
+  // --- SPA Navigation ---
+
+  function handleNavigation() {
+    var currentPathname = window.location.pathname;
+    if (currentPathname !== lastPathname) {
+      lastPathname = currentPathname;
+      if (currentPathname === '/' || currentPathname === '') {
+        setTimeout(function() {
+          waitForFrosmo(init);
+        }, 500);
+      } else {
+        removeSection();
+      }
+    }
+  }
+
+  function checkLoginStateChange() {
+    var currentLoginState = isUserLoggedIn();
+    if (lastLoginState !== null && currentLoginState !== lastLoginState) {
+      if (currentLoginState) {
+        setTimeout(function() { waitForFrosmo(init); }, 500);
+      } else {
+        removeSection();
+      }
+    }
+    lastLoginState = currentLoginState;
+  }
+
+  function setupNavigationListeners() {
+    var originalPushState = history.pushState;
+    var originalReplaceState = history.replaceState;
+
+    history.pushState = function() {
+      originalPushState.apply(this, arguments);
+      handleNavigation();
+    };
+
+    history.replaceState = function() {
+      originalReplaceState.apply(this, arguments);
+      handleNavigation();
+    };
+
+    window.addEventListener('popstate', handleNavigation);
+
+    setInterval(function() {
+      handleNavigation();
+      checkLoginStateChange();
+    }, CONFIG.userCheckInterval);
+  }
+
+  // --- Start ---
+
+  function start() {
+    if (isInitialized) return;
+    isInitialized = true;
+
+    lastLoginState = isUserLoggedIn();
+    setupNavigationListeners();
+    waitForFrosmo(init);
+  }
+
+  start();
+
+})();

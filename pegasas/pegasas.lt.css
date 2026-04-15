@@ -1,0 +1,161 @@
+#peg-top5-strip {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'DM Sans', sans-serif;
+}
+span.peg-top5-rank-hash {
+  margin-top: 4px;
+}
+.peg-top5-inner {
+  border-radius: 0 0 8px 8px;
+
+box-shadow: 0 4px 20px 0 rgba(51, 51, 51, 0.08) inset;
+  background: #fafaf9;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 16px 24px;
+  max-width: 1176px;
+  margin: 0 auto 12px;
+  box-sizing: border-box;
+}
+
+/* ── Left label ── */
+.peg-top5-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.peg-top5-label-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.peg-top5-label-icon {
+  color: #70257b;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.peg-top5-label-top {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 24px;
+  color: #70257b;
+  text-transform: uppercase;
+}
+
+.peg-top5-label-bottom {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333333;
+  text-transform: uppercase;
+  line-height: normal;
+}
+
+/* ── Books list ── */
+.peg-top5-books {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 1 0 0;
+  overflow: hidden;
+}
+
+.peg-top5-book {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 12px;
+
+  transition: opacity 0.15s;
+}
+
+.peg-top5-book:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+.peg-top5-book:last-child {
+  border-left: none;
+  padding-right: 0;
+}
+
+.peg-top5-book:hover {
+  opacity: 0.75;
+}
+
+/* ── Book image ── */
+.peg-top5-img {
+  align-self: flex-start;
+
+  width: 40.6px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  flex-shrink: 0;
+  background: #e0ddd8;
+}
+
+/* ── Book text column (rank + author + title) ── */
+.peg-top5-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.peg-top5-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  background: #70257b;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.peg-top5-rank-hash {
+  font-size: 6px;
+  line-height: 1;
+}
+
+.peg-top5-author {
+  font-size: 12px;
+  font-weight: 400;
+  color: #666666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.peg-top5-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #222222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: auto;
+  display: block;
+}

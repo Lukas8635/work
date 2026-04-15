@@ -33,7 +33,7 @@ async function scrapeTop5() {
   await page.setViewportSize({ width: 1280, height: 800 });
 
   console.log('Loading homepage...');
-  await page.goto('https://www.pegasas.lt/', { waitUntil: 'networkidle', timeout: 60000 });
+  await page.goto('https://www.pegasas.lt/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
   // Click the "Savaitės TOP" tab
   const tab = page.locator('[role="tab"]').filter({ hasText: 'Savaitės TOP' });

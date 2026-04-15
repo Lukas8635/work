@@ -2,11 +2,11 @@ name: Update Pegasas TOP 5
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # Kiekvieną dieną 6:00 UTC (8:00 Lietuva)
-  workflow_dispatch:       # Rankinis paleidimas per GitHub UI
+    - cron: '30 6 * * *'   # 8:30 UTC (9:30 Lietuva) — 30 min po Bright Data run'o
+  workflow_dispatch:        # Rankinis paleidimas
 
 jobs:
-  scrape:
+  update:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,19 +16,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Fetch TOP 5 from Bright Data
+        run: node pegasas/fetch-top5-from-brd.js
+        env:
+          BRD_TOKEN: ${{ secrets.BRD_TOKEN }}
 
-      - name: Install Playwright Chromium
-        run: npx playwright install chromium --with-deps
-
-      - name: Scrape TOP 5
-        run: node pegasas/scrape-top5.js
-
-      - name: Commit updated top5.json
+      - name: Commit top5.json
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add pegasas/top5.json pegasas/top5-seed.js
+          git add pegasas/top5.json
           git diff --staged --quiet || git commit -m "Update Pegasas TOP 5 $(date -u +%Y-%m-%d)"
           git push

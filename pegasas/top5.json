@@ -19,14 +19,6 @@
   },
   {
     "id": 3,
-    "rank": 3,
-    "title": "Komisaras Letena 7. Pėdsakai miške",
-    "href": "/komisaras-letena-7-pedsakai-miske-22086869/",
-    "img": "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000022086869-1-0-0-3-1003d2d9370165c4a96c66c86cd83bd0fd9a8083_komisaras_letena_pedsakai_miske.jpg?op=resize&q=80&w=160",
-    "input": {}
-  },
-  {
-    "id": 4,
     "rank": 4,
     "title": "Žuviukas Niurzga",
     "authors": "Deborah Diesen",
@@ -35,12 +27,21 @@
     "input": {}
   },
   {
-    "id": 5,
+    "id": 4,
     "rank": 5,
     "title": "Visada prisimink. Berniukas, kurmis, lapė, arklys ir audra",
     "authors": "Charlie Mackesy",
     "href": "/visada-prisimink-berniukas-kurmis-lape-arklys-ir-audra-1115122/",
     "img": "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115122-d-6-e-9-d6e9908a46cb08869b43e6fcc90571682c34eaea_visada_prisimink.jpg?op=resize&q=80&w=160",
+    "input": {}
+  },
+  {
+    "id": 5,
+    "rank": 8,
+    "title": "Laimingo gimtadienio, išdykusi katyte",
+    "authors": "Nick Bruel",
+    "href": "/laimingo-gimtadienio-isdykusi-katyte-1114950/",
+    "img": "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001114950-c-0-8-0-c080738f8e03e9517ef8fa0c6ef55696ecfcc611_laimingo_gimtadienio_isdykusi_katyte.jpg?op=resize&q=80&w=160",
     "input": {}
   }
 ]

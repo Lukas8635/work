@@ -35,6 +35,26 @@ async function main() {
       fs.writeFileSync(outPath, JSON.stringify(books, null, 2));
       console.log('Saved', books.length, 'books:');
       books.forEach((b, i) => console.log('  #' + (i + 1), b.title));
+
+      // Update FALLBACK_BOOKS in pegasas.lt.js
+      const jsPath = path.join(__dirname, 'pegasas.lt.js');
+      let jsContent = fs.readFileSync(jsPath, 'utf8');
+      const entries = books.slice(0, 5).map((b, i) => {
+        return [
+          '    {',
+          '      id: ' + (i + 1) + ',',
+          '      title: ' + JSON.stringify(b.title || '') + ',',
+          '      authors: ' + JSON.stringify(b.authors || '') + ',',
+          '      href: ' + JSON.stringify(b.href || '/') + ',',
+          '      img: ' + JSON.stringify(b.img || ''),
+          '    }'
+        ].join('\n');
+      }).join(',\n');
+      const newFallback = '  var FALLBACK_BOOKS = [\n' + entries + '\n  ];';
+      jsContent = jsContent.replace(/  var FALLBACK_BOOKS = \[[\s\S]*?\n  \];/, newFallback);
+      fs.writeFileSync(jsPath, jsContent);
+      console.log('✓ Updated FALLBACK_BOOKS in pegasas.lt.js');
+
       return;
     }
     console.log('Attempt ' + (i + 1) + ' — not ready yet');

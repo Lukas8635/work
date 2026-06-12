@@ -34,7 +34,7 @@ async function main() {
       const outPath = path.join(__dirname, 'top5.json');
       fs.writeFileSync(outPath, JSON.stringify(books, null, 2));
       console.log('Saved', books.length, 'books:');
-      books.forEach(b => console.log('  #' + b.rank, b.title));
+      books.forEach((b, i) => console.log('  #' + (i + 1), b.title));
       return;
     }
     console.log('Attempt ' + (i + 1) + ' — not ready yet');

@@ -1,84 +1,119 @@
-/* Stock Indicator Styles */
-
-/* Base stock indicator container */
-.stock-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  line-height: normal;
-  margin: 9.5px 0;
-}
-
-/* Stock indicator dot */
-.stock-indicator__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.stock-indicator__text {
-  font-weight: 400;
-}
-
-/* In stock - green */
-.stock-indicator--in-stock .stock-indicator__dot {
-  background-color: #58C713;
-}
-
-.stock-indicator--in-stock .stock-indicator__text {
-  color: #fff;
-}
-
-/* Limited stock - orange */
-.stock-indicator--limited-stock .stock-indicator__dot {
-  background-color: #FF8C00;
-}
-
-.stock-indicator--limited-stock .stock-indicator__text {
-  color: #fff;
-}
-
-/* Out of stock - red */
-.stock-indicator--out-of-stock .stock-indicator__dot {
-  background-color: #E63946;
-}
-
-.stock-indicator--out-of-stock .stock-indicator__text {
-  color: #E63946;
-}
-
-/* Homepage specific styles - darker background cards */
-.homepage-product-card .stock-indicator__text {
-  color: #fff;
-}
-
-/* PDP specific styles */
-.pdp-stock-indicator {
-  margin-top: 24px;
-  margin-bottom: 0px;
-}
-
-.pdp-stock-indicator .stock-indicator__text {
-  font-size: 14px;
-}
-
-/* Animation for stock indicator appearance */
-.stock-indicator {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-div.js__sticky-bar-target > div.mb-3{
+.summer-promo-products-row-card-action {
   display: none;
+}
+
+/* Label badge */
+.summer-promo-products-card-inner {
+  position: relative;
+}
+.wc-label {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: normal;
+  color: #34303d;
+  max-width: max-content;
+  white-space: nowrap;
+  margin-bottom: 8px;
+}
+.wc-label--light {
+  background: #ffffff;
+}
+.wc-label--teal {
+  background: #00d1d2;
+}
+.wc-label--yellow {
+  background: #e5b052;
+}
+.summer-promo-products-static-card {
+  padding: 4px !important;
+}
+
+/* Feature tags */
+.wc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.wc-tags .wc-learn-more {
+  padding-left: 8px;
+}
+.wc-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #e5b052;
+  color: #34303d;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: normal;
+  white-space: nowrap;
+}
+.wc-learn-more {
+  font-size: 14px;
+  color: #34303d;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+  padding-left: 8px;
+}
+
+/* HS card "Узнать больше" span — override btn-dark button appearance */
+span.btn.wc-learn-more {
+  font-size: 14px !important;
+  background: transparent !important;
+  color: #34303d !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  width: auto !important;
+  display: inline-block !important;
+  position: static !important;
+  overflow: visible !important;
+}
+span.btn.wc-learn-more::after {
+  display: none !important;
+}
+
+/* ATC button */
+.wc-atc {
+  width: 100% !important;
+  border: none !important;
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 10px 24px !important;
+}
+
+/* Hover animation — btn-dark has no built-in ::after so we add it all here */
+.wc-btn-animated {
+  position: relative !important;
+  overflow: hidden !important;
+}
+.wc-btn-animated::after {
+  content: ' ';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  background: #00d1d2;
+  width: 120%;
+  height: 120%;
+  z-index: -1;
+  transition: transform 0.25s ease-out;
+  transform: translate(-101%, -50%) skew(0deg);
+  opacity: 1;
+}
+.wc-btn-animated.wc-btn-hovered {
+  background: transparent !important;
+  color: #34303d !important;
+  transition:
+    background 0.15s 0.2s,
+    color 0.2s !important;
+}
+.wc-btn-animated.wc-btn-hovered::after {
+  transform: translate(-10%, -50%) skew(-30deg);
+}
+.btn-dark.wc-learn-more::before {
+  display: none !important;
 }

@@ -1,575 +1,328 @@
-/**
- * IQOS EE Stock Indicator Script
- * Adds "In stock" / "Limited stock" / "Out of stock" indicators
- * to homepage product cards and PDP pages
- * Supports Estonian and Russian locales
- */
-
 (function() {
   'use strict';
 
-  // ============================================
-  // CONFIGURATION
-  // ============================================
+  // ── PDP step strip ───────────────────────────────────────────────────────
 
-  const CONFIG = {
-    // Stock status types
-    STOCK_STATUS: {
-      IN_STOCK: 'in-stock',
-      LIMITED_STOCK: 'limited-stock',
-      OUT_OF_STOCK: 'out-of-stock'
+  var STRIP_ID = 'iqos-steps-strip';
+
+  var LABELS = {
+    et: {
+      step1: 'Seade',
+      step2: 'Värvus',
+      step3: 'Broneering'
     },
-
-    // Labels for each status by locale
-    LABELS: {
-      et: {
-        'in-stock': 'Saadaval',
-        'limited-stock': 'Piiratud kogus',
-        'out-of-stock': 'Pole saadaval'
-      },
-      ru: {
-        'in-stock': 'В наличии',
-        'limited-stock': 'Ограниченный запас',
-        'out-of-stock': 'Нет в наличии'
-      }
-    },
-
-    // Session storage key for stock data
-    SESSION_STORAGE_KEY: 'iqos_stock_data',
-
-    // Default stock status (used when no data available)
-    DEFAULT_STATUS: 'in-stock',
-
-    // Selectors
-    SELECTORS: {
-      // Homepage product cards - look for links inside main content (ET and RU URLs)
-      HOMEPAGE_PRODUCT_CARDS: 'main a[href*="/kataloog/"], main a[href*="/katalog/"]',
-      HOMEPAGE_PRODUCT_TITLE: 'h3',
-
-      // PDP selectors
-      PDP_TITLE: 'main h1',
-      // EE site uses fieldset/group for color selection
-      PDP_COLOR_LIST: '[role="group"]:has(input[type="radio"]), fieldset:has(input[type="radio"])',
-      PDP_COLOR_RADIO: 'input[type="radio"]',
-      PDP_SELECTED_COLOR: 'input[type="radio"]:checked',
+    ru: {
+      step1: 'Устройство',
+      step2: 'Цвет',
+      step3: 'Бронирования'
     }
   };
 
-  // ============================================
-  // LOCALE DETECTION
-  // ============================================
+  var SELECTORS = {
+    PRODUCT_LABELS: '.product-labels',
+    COLOR_GROUP: '[role="group"]:has(input[type="radio"]), fieldset:has(input[type="radio"])',
+    RATING_SUMMARY: '.rating_summary',
+    PDP_FORM: 'form[data-category]'
+  };
 
-  /**
-   * Get current locale from URL
-   * @returns {string} 'et' or 'ru'
-   */
-  function getCurrentLocale() {
-    const path = window.location.pathname;
-    if (path.includes('/ru/') || path.startsWith('/ru')) {
-      return 'ru';
-    }
-    return 'et';
+  var DEVICE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3327 4L5.99935 11.3333L2.66602 8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function getLocale() {
+    var path = window.location.pathname;
+    return (path.indexOf('/ru/') !== -1 || path.indexOf('/ru') === 0) ? 'ru' : 'et';
   }
 
-  /**
-   * Get label for stock status in current locale
-   * @param {string} status - Stock status
-   * @returns {string} Localized label
-   */
-  function getLocalizedLabel(status) {
-    const locale = getCurrentLocale();
-    const labels = CONFIG.LABELS[locale] || CONFIG.LABELS.et;
-    return labels[status] || labels[CONFIG.DEFAULT_STATUS];
+  function isPDP() {
+    var path = window.location.pathname;
+    return (path.indexOf('/kataloog/') !== -1 || path.indexOf('/katalog/') !== -1) &&
+           !!document.querySelector(SELECTORS.PDP_FORM);
   }
 
-  // ============================================
-  // STOCK DATA MANAGEMENT
-  // ============================================
+  function createStrip() {
+    var locale = getLocale();
+    var labels = LABELS[locale];
+    var step3Label = labels.step3;
 
-  /**
-   * Get stock data from session storage
-   * @returns {Object} Stock data object keyed by product identifier
-   */
-  function getStockDataFromStorage() {
-    try {
-      const data = sessionStorage.getItem(CONFIG.SESSION_STORAGE_KEY);
-      return data ? JSON.parse(data) : {};
-    } catch (e) {
-      console.warn('[Stock Indicator] Error reading session storage:', e);
-      return {};
-    }
+    var strip = document.createElement('div');
+    strip.id = STRIP_ID;
+    strip.innerHTML =
+      '<div class="iqos-steps">' +
+        '<div class="iqos-step">' +
+          '<div class="iqos-step__icon iqos-step__icon--done">' + DEVICE_SVG + '</div>' +
+          '<span class="iqos-step__label iqos-step__label--done">' + labels.step1 + '</span>' +
+        '</div>' +
+        '<div class="iqos-step__line iqos-step__line--done"></div>' +
+        '<div class="iqos-step">' +
+          '<div class="iqos-step__icon iqos-step__icon--active">2</div>' +
+          '<span class="iqos-step__label iqos-step__label--active">' + labels.step2 + '</span>' +
+        '</div>' +
+        '<div class="iqos-step__line"></div>' +
+        '<div class="iqos-step">' +
+          '<div class="iqos-step__icon iqos-step__icon--next">3</div>' +
+          '<span class="iqos-step__label">' + step3Label + '</span>' +
+        '</div>' +
+      '</div>';
+
+    return strip;
   }
 
-  /**
-   * Get stock status for a product
-   * @param {string} productId - Product identifier (e.g., SKU, URL slug, or product name)
-   * @param {string} [variantId] - Optional variant identifier (e.g., color)
-   * @returns {string} Stock status from CONFIG.STOCK_STATUS
-   */
-  function getStockStatus(productId, variantId) {
-    variantId = variantId || null;
-    const stockData = getStockDataFromStorage();
+  function insertStrip() {
+    if (document.getElementById(STRIP_ID) || !isPDP()) return;
 
-    // Try to find stock data with variant
-    if (variantId && stockData[productId + '_' + variantId]) {
-      return stockData[productId + '_' + variantId];
+    var strip = createStrip();
+
+    var productLabels = document.querySelector(SELECTORS.PRODUCT_LABELS);
+    if (productLabels) {
+      productLabels.insertAdjacentElement('afterend', strip);
+      return;
     }
 
-    // Try to find stock data without variant
-    if (stockData[productId]) {
-      return stockData[productId];
+    var colorGroup = document.querySelector(SELECTORS.COLOR_GROUP);
+    if (colorGroup) {
+      colorGroup.insertAdjacentElement('beforebegin', strip);
+      return;
     }
 
-    // Return default status
-    return CONFIG.DEFAULT_STATUS;
-  }
-
-  /**
-   * Set stock status for a product (for testing/demo purposes)
-   * @param {string} productId - Product identifier
-   * @param {string} status - Stock status
-   * @param {string} [variantId] - Optional variant identifier
-   */
-  function setStockStatus(productId, status, variantId) {
-    variantId = variantId || null;
-    const stockData = getStockDataFromStorage();
-    const key = variantId ? productId + '_' + variantId : productId;
-    stockData[key] = status;
-
-    try {
-      sessionStorage.setItem(CONFIG.SESSION_STORAGE_KEY, JSON.stringify(stockData));
-    } catch (e) {
-      console.warn('[Stock Indicator] Error writing to session storage:', e);
+    var ratingSummary = document.querySelector(SELECTORS.RATING_SUMMARY);
+    if (ratingSummary) {
+      ratingSummary.insertAdjacentElement('afterend', strip);
     }
   }
 
-  // Expose setStockStatus globally for dynamic updates
-  window.iqosSetStockStatus = setStockStatus;
+  var reinitTimeout = null;
 
-  // ============================================
-  // UI COMPONENTS
-  // ============================================
-
-  /**
-   * Create stock indicator element
-   * @param {string} status - Stock status from CONFIG.STOCK_STATUS
-   * @param {string[]} [additionalClasses] - Additional CSS classes
-   * @returns {HTMLElement} Stock indicator element
-   */
-  function createStockIndicator(status, additionalClasses) {
-    additionalClasses = additionalClasses || [];
-    const indicator = document.createElement('div');
-    indicator.className = ('stock-indicator stock-indicator--' + status + ' ' + additionalClasses.join(' ')).trim();
-    indicator.setAttribute('data-stock-status', status);
-
-    const dot = document.createElement('span');
-    dot.className = 'stock-indicator__dot';
-
-    const text = document.createElement('span');
-    text.className = 'stock-indicator__text';
-    text.textContent = getLocalizedLabel(status);
-
-    indicator.appendChild(dot);
-    indicator.appendChild(text);
-
-    return indicator;
-  }
-
-  /**
-   * Update existing stock indicator
-   * @param {HTMLElement} indicator - Existing indicator element
-   * @param {string} newStatus - New stock status
-   */
-  function updateStockIndicator(indicator, newStatus) {
-    // Remove old status classes
-    var statuses = Object.values(CONFIG.STOCK_STATUS);
-    for (var i = 0; i < statuses.length; i++) {
-      indicator.classList.remove('stock-indicator--' + statuses[i]);
-    }
-
-    // Add new status class
-    indicator.classList.add('stock-indicator--' + newStatus);
-    indicator.setAttribute('data-stock-status', newStatus);
-
-    // Update text
-    const textEl = indicator.querySelector('.stock-indicator__text');
-    if (textEl) {
-      textEl.textContent = getLocalizedLabel(newStatus);
-    }
-
-    // Re-trigger animation
-    indicator.style.animation = 'none';
-    indicator.offsetHeight; // Trigger reflow
-    indicator.style.animation = '';
-  }
-
-  // ============================================
-  // HOMEPAGE FUNCTIONALITY
-  // ============================================
-
-  /**
-   * Extract product identifier from product card
-   * @param {HTMLElement} card - Product card element
-   * @returns {string} Product identifier
-   */
-  function getProductIdFromCard(card) {
-    // Try to get from URL
-    const href = card.getAttribute('href') || '';
-    const urlMatch = href.match(/\/([^\/\?]+)(?:\?|$)/);
-    if (urlMatch) {
-      return urlMatch[1];
-    }
-
-    // Try to get from product title
-    const titleEl = card.querySelector(CONFIG.SELECTORS.HOMEPAGE_PRODUCT_TITLE);
-    if (titleEl) {
-      return titleEl.textContent.trim().toLowerCase().replace(/\s+/g, '-');
-    }
-
-    return 'unknown-product';
-  }
-
-  /**
-   * Add stock indicators to homepage product cards
-   */
-  function initHomepageStockIndicators() {
-    // Find all product links in main content
-    const productCards = document.querySelectorAll('main a[href*="/kataloog/"], main a[href*="/katalog/"]');
-
-    productCards.forEach(function(card) {
-      // Skip if already has stock indicator
-      if (card.querySelector('.stock-indicator')) {
-        return;
-      }
-
-      // Skip footer/navigation links - only process product cards in content area
-      if (card.closest('footer') || card.closest('nav')) {
-        return;
-      }
-
-      // Get product ID and stock status
-      const productId = getProductIdFromCard(card);
-      const stockStatus = getStockStatus(productId);
-
-      // Create stock indicator
-      const indicator = createStockIndicator(stockStatus, ['homepage-product-card']);
-
-      // Find insertion point - look for product name element or price element
-      // EE site uses nested divs, find the element containing product name (starts with IQOS)
-      const allElements = card.querySelectorAll('*');
-      var insertAfter = null;
-
-      for (var i = 0; i < allElements.length; i++) {
-        var el = allElements[i];
-        const text = el.textContent ? el.textContent.trim() : '';
-        // Find element that contains just the product name (IQOS...)
-        if (text && text.match(/^IQOS\s+ILUMA/i) && el.children.length === 0) {
-          insertAfter = el;
+  function setupObserver() {
+    new MutationObserver(function(mutations) {
+      if (document.getElementById(STRIP_ID)) return;
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].addedNodes.length > 0) {
+          clearTimeout(reinitTimeout);
+          reinitTimeout = setTimeout(insertStrip, 200);
           break;
         }
       }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
 
-      if (insertAfter) {
-        insertAfter.insertAdjacentElement('afterend', indicator);
-      } else {
-        // Fallback: insert at the beginning of the card's first child
-        const firstChild = card.firstElementChild;
-        if (firstChild) {
-          firstChild.insertAdjacentElement('afterbegin', indicator);
-        }
-      }
+  // ── Homepage card enhancement ────────────────────────────────────────────
+
+  var T = {
+    et: { learnMore: 'Uuri lähemalt', addToCart: 'Broneerima', badge: 'Uus' },
+    ru: { learnMore: 'Узнать больше', addToCart: 'Забронировать', badge: 'Новый' }
+  };
+
+  // Ordered most-specific first to avoid slug substring collisions
+  // ET uses /kataloog/ (double-o), RU uses /katalog/ (single-o)
+  var DEVICE_CONFIG = [
+    {
+      slug: 'iqos-iluma-i-prime',
+      productId: 303,
+      defaultVariant: 'DK005318',
+      radioName: 'iqos-iluma-i-prime',
+      pdpPath: { et: '/kataloog/iluma-i/iqos-iluma-i-prime', ru: '/katalog/iluma-i/iqos-iluma-i-prime' }
+    },
+    {
+      slug: 'iqos-iluma-i-one',
+      productId: 301,
+      defaultVariant: 'DK005315',
+      radioName: 'iqos-iluma-i-one',
+      pdpPath: { et: '/kataloog/iluma-i/iqos-iluma-i-one', ru: '/katalog/iluma-i/iqos-iluma-i-one' }
+    },
+    {
+      slug: 'iqos-iluma-i',
+      productId: 302,
+      defaultVariant: 'DK005319',
+      radioName: 'iqos-iluma-i',
+      pdpPath: { et: '/kataloog/iluma-i/iqos-iluma-i', ru: '/katalog/iluma-i/iqos-iluma-i' }
+    }
+  ];
+
+  var tokenCache = {};
+
+  function prefetchToken(pdpUrl) {
+    if (tokenCache[pdpUrl]) return;
+    tokenCache[pdpUrl] = fetch(pdpUrl, { credentials: 'include' })
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var input = doc.querySelector('[name="sylius_add_to_cart[_token]"]');
+        return input ? input.value : null;
+      })
+      .catch(function() { return null; });
+  }
+
+  function addHoverAnimation(el) {
+    el.classList.add('wc-btn-animated');
+    el.addEventListener('mouseenter', function() { if (!el.disabled) el.classList.add('wc-btn-hovered'); });
+    el.addEventListener('mouseleave', function() { el.classList.remove('wc-btn-hovered'); });
+  }
+
+  function doAddToCart(cfg, originalCard, btn) {
+    var locale = getLocale();
+    var selectedRadio = originalCard.querySelector('input[name="' + cfg.radioName + '"]:checked');
+    var variant = selectedRadio ? selectedRadio.value : cfg.defaultVariant;
+    var pdpUrl = location.origin + '/' + locale + cfg.pdpPath[locale];
+
+    btn.disabled = true;
+    btn.classList.remove('wc-btn-hovered');
+
+    prefetchToken(pdpUrl);
+    Promise.resolve(tokenCache[pdpUrl])
+      .then(function(token) {
+        if (!token) throw new Error('no token');
+        var fd = new FormData();
+        fd.append('sylius_add_to_cart[cartItem][variant]', variant);
+        fd.append('sylius_add_to_cart[_token]', token);
+        return fetch(location.origin + '/' + locale + '/ajax/cart/add?productId=' + cfg.productId, {
+          method: 'POST',
+          body: fd,
+          credentials: 'include'
+        });
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        window.location.href = location.origin + (data.redirect || '/' + locale + '/valikud');
+      })
+      .catch(function() { btn.disabled = false; });
+  }
+
+  function getImageSrc(card) {
+    var img = card.querySelector('.js__product-first-image');
+    if (!img) return '';
+    var dataSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy');
+    if (dataSrc) return dataSrc;
+    // Fall back to src only if it's not a placeholder
+    var src = img.src || '';
+    return src.indexOf('data:') === 0 ? '' : src;
+  }
+
+  function getProductName(card) {
+    var legend = card.querySelector('legend');
+    if (!legend) return '';
+    return legend.textContent.trim()
+      .replace(/\s*Valige värv\s*$/, '')
+      .replace(/\s*Выберите цвет\s*$/, '');
+  }
+
+  function getPrice(card) {
+    var el = card.querySelector('.h2');
+    return el ? el.textContent.trim() : '';
+  }
+
+  function buildCard(data, t) {
+    // Parse "€89.00" -> "89"
+    var priceMatch = data.price.match(/(\d+)/);
+    var priceNum = priceMatch ? priceMatch[1] : data.price;
+
+    var card = document.createElement('div');
+    card.className = 'wc-card';
+    card.innerHTML =
+      '<div class="wc-card__badge">' + t.badge + '</div>' +
+      '<div class="wc-card__img-wrap">' +
+        '<img class="wc-card__img" src="' + data.imgSrc + '" alt="' + data.productName + '">' +
+      '</div>' +
+      '<div class="wc-card__content">' +
+        '<div class="wc-card__text">' +
+          '<p class="wc-card__name">' + data.productName + '</p>' +
+          '<div class="wc-card__price">' +
+            '<span class="wc-card__price-num">' + priceNum + '</span>' +
+            '<span class="wc-card__price-cur">EUR</span>' +
+          '</div>' +
+        '</div>' +
+        '<a class="wc-learn-more" href="' + data.pdpHref + '">' + t.learnMore + '</a>' +
+      '</div>';
+
+    var atcBtn = document.createElement('button');
+    atcBtn.className = 'wc-atc';
+    atcBtn.type = 'button';
+    atcBtn.textContent = t.addToCart;
+    addHoverAnimation(atcBtn);
+    atcBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      doAddToCart(data.cfg, data.originalCard, atcBtn);
     });
 
-    console.log('[Stock Indicator] Homepage indicators initialized');
-  }
+    card.querySelector('.wc-card__content').appendChild(atcBtn);
 
-  // ============================================
-  // PDP FUNCTIONALITY
-  // ============================================
-
-  /**
-   * Check if current page is a PDP
-   * @returns {boolean}
-   */
-  function isPDPPage() {
-    const path = window.location.pathname;
-    // Support Estonian (/kataloog/), Russian (/katalog/)
-    return (path.includes('/kataloog/') || path.includes('/katalog/')) &&
-           document.querySelector(CONFIG.SELECTORS.PDP_TITLE) !== null;
-  }
-
-  /**
-   * Check if current page is homepage
-   * @returns {boolean}
-   */
-  function isHomepage() {
-    const path = window.location.pathname;
-    // Match /et, /et/, /ru, /ru/, or just /
-    return path === '/' ||
-           path === '/et' ||
-           path === '/et/' ||
-           path === '/ru' ||
-           path === '/ru/' ||
-           (path.match(/^\/(et|ru)\/?$/) !== null);
-  }
-
-  /**
-   * Get product ID from PDP
-   * @returns {string} Product identifier
-   */
-  function getPDPProductId() {
-    // Try to get from URL
-    const pathParts = window.location.pathname.split('/').filter(Boolean);
-    return pathParts[pathParts.length - 1] || 'unknown-product';
-  }
-
-  /**
-   * Get currently selected color variant on PDP
-   * @returns {string|null} Selected variant ID or null
-   */
-  function getSelectedColorVariant() {
-    const selectedRadio = document.querySelector(CONFIG.SELECTORS.PDP_SELECTED_COLOR);
-    if (selectedRadio) {
-      // Try multiple ways to get the color name
-      var closestLabel = selectedRadio.closest('[aria-label]');
-      var parentLabel = selectedRadio.parentElement ? selectedRadio.parentElement.querySelector('[aria-label]') : null;
-      var sibling = selectedRadio.nextElementSibling;
-      return selectedRadio.getAttribute('aria-label') ||
-             (closestLabel ? closestLabel.getAttribute('aria-label') : null) ||
-             (parentLabel ? parentLabel.getAttribute('aria-label') : null) ||
-             (sibling && sibling.textContent ? sibling.textContent.trim() : null) ||
-             selectedRadio.value;
-    }
-
-    return null;
-  }
-
-  /**
-   * Add or update stock indicator on PDP
-   */
-  function updatePDPStockIndicator() {
-    const productId = getPDPProductId();
-    const variantId = getSelectedColorVariant();
-    const stockStatus = getStockStatus(productId, variantId);
-
-    // Find existing indicator
-    var indicator = document.querySelector('.pdp-stock-indicator');
-
-    if (indicator) {
-      // Update existing indicator
-      updateStockIndicator(indicator, stockStatus);
-    } else {
-      // Create new indicator
-      indicator = createStockIndicator(stockStatus, ['pdp-stock-indicator']);
-
-      // Find insertion point - after color list's parent container
-      const colorList = document.querySelector(CONFIG.SELECTORS.PDP_COLOR_LIST);
-      if (colorList) {
-        const colorSection = colorList.parentElement;
-        if (colorSection) {
-          colorSection.insertAdjacentElement('afterend', indicator);
-        } else {
-          colorList.insertAdjacentElement('afterend', indicator);
-        }
-      } else {
-        // Fallback: insert after h1 title
-        const title = document.querySelector(CONFIG.SELECTORS.PDP_TITLE);
-        if (title) {
-          title.insertAdjacentElement('afterend', indicator);
-        }
-      }
-    }
-  }
-
-  /**
-   * Set up color variant change listener on PDP
-   */
-  function setupPDPColorChangeListener() {
-    const colorList = document.querySelector(CONFIG.SELECTORS.PDP_COLOR_LIST);
-    if (!colorList) {
-      return;
-    }
-
-    // Mark as having listener to avoid duplicate listeners
-    if (colorList.dataset.stockListener) {
-      return;
-    }
-    colorList.dataset.stockListener = 'true';
-
-    // Listen for clicks on the color list
-    colorList.addEventListener('click', function() {
-      // Small delay to let the radio state update
-      setTimeout(function() {
-        updatePDPStockIndicator();
-      }, 150);
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function() {
+      window.location.href = data.pdpHref;
     });
 
-    // Also listen for change events on radio buttons
-    const radios = colorList.querySelectorAll('input[type="radio"]');
-    radios.forEach(function(radio) {
-      radio.addEventListener('change', function() {
-        setTimeout(function() {
-          updatePDPStockIndicator();
-        }, 150);
+    return card;
+  }
+
+  function enhanceHomepageCards() {
+    var locale = getLocale();
+    var t = T[locale];
+    var cards = document.querySelectorAll('.js__product-color-select-wrapper');
+    if (!cards.length) return;
+
+    var row = cards[0].closest('.row');
+    if (!row || row.dataset.wcDone) return;
+    row.dataset.wcDone = '1';
+
+    var cardDataList = [];
+
+    cards.forEach(function(card) {
+      var existingBtn = card.querySelector('.btn-electric-purple');
+      if (!existingBtn) return;
+
+      var href = existingBtn.getAttribute('href') || '';
+      var cfg = null;
+      for (var i = 0; i < DEVICE_CONFIG.length; i++) {
+        if (href.indexOf(DEVICE_CONFIG[i].slug) !== -1) { cfg = DEVICE_CONFIG[i]; break; }
+      }
+      if (!cfg) return;
+
+      prefetchToken(location.origin + '/' + locale + cfg.pdpPath[locale]);
+
+      cardDataList.push({
+        cfg: cfg,
+        imgSrc: getImageSrc(card),
+        productName: getProductName(card),
+        price: getPrice(card),
+        pdpHref: '/' + locale + cfg.pdpPath[locale],
+        originalCard: card
       });
     });
-  }
 
-  /**
-   * Initialize PDP stock indicator
-   */
-  function initPDPStockIndicator() {
-    if (!isPDPPage()) {
-      return;
-    }
+    if (!cardDataList.length) return;
 
-    updatePDPStockIndicator();
-    setupPDPColorChangeListener();
-    console.log('[Stock Indicator] PDP indicator initialized');
-  }
+    var container = document.createElement('div');
+    container.className = 'wc-cards-container';
 
-  // ============================================
-  // INITIALIZATION
-  // ============================================
-
-  /**
-   * Main initialization function
-   */
-  function init() {
-    console.log('[Stock Indicator] Initializing...', {
-      pathname: window.location.pathname,
-      isHomepage: isHomepage(),
-      isPDP: isPDPPage(),
-      locale: getCurrentLocale()
+    cardDataList.forEach(function(data) {
+      container.appendChild(buildCard(data, t));
     });
 
-    // Add body class for page-specific CSS only on homepage and PDP
-    if (isHomepage() || isPDPPage()) {
-      document.body.classList.add('stock-indicator-page');
+    var section = document.createElement('div');
+    section.className = 'wc-section wc-section--' + locale;
+    section.appendChild(container);
+
+    var heroSlider = document.querySelector('.hero-slider.position-relative.smaller-slider-on-mobile');
+    if (heroSlider) {
+      heroSlider.classList.add('wc-hero-replaced');
+      heroSlider.appendChild(section);
     } else {
-      document.body.classList.remove('stock-indicator-page');
+      row.parentElement.insertBefore(section, row);
     }
-
-    if (isHomepage()) {
-      initHomepageStockIndicators();
-    }
-
-    if (isPDPPage()) {
-      initPDPStockIndicator();
-    }
-
-    console.log('[Stock Indicator] Initialized successfully');
+    row.style.display = 'none';
   }
 
-  // Run on DOM ready
+  // ── Init ─────────────────────────────────────────────────────────────────
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    // Small delay to ensure page is fully rendered
-    setTimeout(init, 500);
-  }
-
-  // Also run on dynamic content changes (for SPAs)
-  var reinitTimeout = null;
-  var observer = new MutationObserver(function(mutations) {
-    // Check if stock indicator was removed or if important elements were added
-    const colorListExists = document.querySelector(CONFIG.SELECTORS.PDP_COLOR_LIST);
-    const homepageCardsExist = document.querySelectorAll('main ul li a h3').length > 0;
-
-    var shouldReinit = false;
-
-    // If we're on PDP and indicator is missing but color list exists, reinit
-    if (isPDPPage() && !document.querySelector('.pdp-stock-indicator') && colorListExists) {
-      shouldReinit = true;
-    }
-
-    // If we're on homepage and indicators are missing but cards exist, reinit
-    if (isHomepage() && homepageCardsExist && !document.querySelector('.homepage-product-card')) {
-      shouldReinit = true;
-    }
-
-    // Also check for major DOM changes
-    mutations.forEach(function(mutation) {
-      if (mutation.addedNodes.length > 0) {
-        mutation.addedNodes.forEach(function(node) {
-          if (node.nodeType === 1) {
-            var matches = node.matches || node.msMatchesSelector || node.webkitMatchesSelector;
-            if (matches) {
-              matches = matches.bind(node);
-              if (
-                matches('main') ||
-                node.querySelector('main') ||
-                matches('h1') ||
-                matches('h3') ||
-                matches('ul') ||
-                node.querySelector('input[type="radio"]')
-              ) {
-                shouldReinit = true;
-              }
-            }
-          }
-        });
-      }
+    document.addEventListener('DOMContentLoaded', function() {
+      insertStrip();
+      setupObserver();
+      enhanceHomepageCards();
     });
-
-    if (shouldReinit) {
-      // Debounce reinit calls
-      clearTimeout(reinitTimeout);
-      reinitTimeout = setTimeout(function() {
-        if (isPDPPage()) {
-          updatePDPStockIndicator();
-          setupPDPColorChangeListener();
-        }
-        if (isHomepage()) {
-          initHomepageStockIndicators();
-        }
-      }, 200);
-    }
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // ============================================
-  // DEMO/TEST UTILITIES
-  // ============================================
-
-  /**
-   * Demo function to set up test stock data
-   * Call this from console: iqosDemoStockData()
-   */
-  window.iqosDemoStockData = function() {
-    // Set some demo stock statuses
-    setStockStatus('iqos-iluma-i-one', CONFIG.STOCK_STATUS.IN_STOCK);
-    setStockStatus('iqos-iluma-i-one-ja-2-terea-pakki', CONFIG.STOCK_STATUS.IN_STOCK);
-    setStockStatus('iqos-iluma-i', CONFIG.STOCK_STATUS.LIMITED_STOCK);
-    setStockStatus('iqos-iluma-i-ja-2-terea-pakki', CONFIG.STOCK_STATUS.LIMITED_STOCK);
-    setStockStatus('iqos-iluma-i-prime', CONFIG.STOCK_STATUS.OUT_OF_STOCK);
-
-    // Variant-specific statuses
-    setStockStatus('iqos-iluma-i-prime', CONFIG.STOCK_STATUS.IN_STOCK, 'Breeze Blue');
-    setStockStatus('iqos-iluma-i-prime', CONFIG.STOCK_STATUS.OUT_OF_STOCK, 'Midnight Black');
-    setStockStatus('iqos-iluma-i-prime', CONFIG.STOCK_STATUS.LIMITED_STOCK, 'Garnet Red');
-
-    console.log('[Stock Indicator] Demo data loaded. Refresh or call init() to see changes.');
-    init();
-  };
-
-  /**
-   * Clear all stock data
-   * Call this from console: iqosClearStockData()
-   */
-  window.iqosClearStockData = function() {
-    sessionStorage.removeItem(CONFIG.SESSION_STORAGE_KEY);
-    console.log('[Stock Indicator] Stock data cleared.');
-    init();
-  };
-
-  /**
-   * Manually reinit
-   */
-  window.iqosInit = init;
+  } else {
+    setTimeout(insertStrip, 300);
+    setupObserver();
+    enhanceHomepageCards();
+  }
 
 })();

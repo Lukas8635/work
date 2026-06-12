@@ -1,85 +1,195 @@
-/* Stock Indicator Styles */
+/* ── Hero slider replacement ────────────────────────────────────────────── */
 
-/* Base stock indicator container */
-.stock-indicator {
+.wc-hero-replaced {
+  background-image: url('https://semexit.s3.eu-west-1.amazonaws.com/iqos/ee-frame.png') !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-position: top !important;
+}
+
+.wc-hero-replaced .swiper-slide {
+  background: transparent !important;
+}
+.hero-slider-image-container {
+  display: none !important;
+}
+.hero-slider.position-relative.smaller-slider-on-mobile.wc-hero-replaced {
+  min-height: auto !important;
+  width: -webkit-fill-available;
+}
+
+.wc-hero-replaced .cover {
+  display: none !important;
+}
+[role='button'][data-promotion-id='electricpurple_hp_banner_06.08_2026-06-05'] {
+  display: none !important;
+}
+
+/* .wc-hero-replaced .swiper-main,
+.wc-hero-replaced .hero-slider-navigation {
+  display: none !important;
+} */
+
+/* ── Cards section ──────────────────────────────────────────────────────── */
+
+.wc-section {
+  padding-top: 220px;
+  z-index: 100;
+  position: relative;
+}
+.wc-section.wc-section--et {
+  padding-bottom: 22px;
+}
+.wc-section--ru {
+  padding-top: 236px;
+  padding-bottom: 16px;
+  position: relative;
+  z-index: 5;
+}
+.hero-slider-slide-in-content-container {
+  top: 3% !important;
+}
+.wc-card__price-cur {
+  position: relative;
+  top: -11px;
+}
+.hero-slider-slide-title.hero-slider-slide-in-content-first.mb-3.js__timer-size-wrapper {
+  margin-bottom: 56px !important;
+}
+.sub-nav {
+  display: none !important;
+}
+
+.wc-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.wc-card {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border-radius: 16px;
+  min-height: 185px;
+  padding: 16px 16px 16px 0;
+  overflow: hidden;
+}
+
+.wc-card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #00d1d2;
+  color: #34303d;
   font-size: 12px;
-  line-height: normal;
-  margin: 9.5px 0;
-}
-
-/* Stock indicator dot */
-.stock-indicator__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.stock-indicator__text {
   font-weight: 400;
+  line-height: 1;
+  padding: 2px 8px 4px;
+  border-radius: 6px;
+  z-index: 1;
 }
 
-/* In stock - green */
-.stock-indicator--in-stock .stock-indicator__dot {
-  background-color: #58C713;
+.wc-card__img-wrap {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
 }
 
-.stock-indicator--in-stock .stock-indicator__text {
-  color: #fff;
+.wc-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-/* Limited stock - orange */
-.stock-indicator--limited-stock .stock-indicator__dot {
-  background-color: #FF8C00;
+.wc-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
 }
 
-.stock-indicator--limited-stock .stock-indicator__text {
-  color: #fff;
+.wc-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #34303d;
 }
 
-/* Out of stock - red */
-.stock-indicator--out-of-stock .stock-indicator__dot {
-  background-color: #E63946;
+.wc-card__name {
+  font-size: 16px;
+  margin: 0;
+  line-height: normal;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
-.stock-indicator--out-of-stock .stock-indicator__text {
-  color: #E63946;
+.wc-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 1.4;
+  color: #34303d;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-/* Homepage specific styles - darker background cards */
-.homepage-product-card .stock-indicator__text {
-  color: #fff;
+.wc-card__price-num {
+  font-size: 32px;
 }
 
-/* PDP specific styles */
-.pdp-stock-indicator {
-  margin-top: 24px;
-  margin-bottom: 0px;
-}
-
-.pdp-stock-indicator .stock-indicator__text {
+.wc-card__price-cur {
   font-size: 14px;
 }
 
-/* Animation for stock indicator appearance */
-.stock-indicator {
-  animation: fadeIn 0.3s ease-in-out;
+.wc-learn-more {
+  display: block;
+  color: #34303d !important;
+  font-size: 11px;
+  text-decoration: underline !important;
+  text-decoration-color: #34303d !important;
+  cursor: pointer;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.wc-learn-more:hover {
+  color: #34303d !important;
 }
 
-/* Sticky bar hide - applied via JS only on homepage and PDP */
-body.stock-indicator-page div.js__sticky-bar-target > div.mb-3 {
-  display: none;
+.wc-atc {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: #34303d;
+  color: #fff;
+  border: none;
+  border-radius: 300px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 0 24px 2px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.wc-atc:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wc-btn-animated {
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+
+.wc-btn-hovered {
+  opacity: 0.85;
 }

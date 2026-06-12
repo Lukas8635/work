@@ -27,7 +27,8 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git pull --rebase
+          git fetch origin
           git add pegasas/top5.json
           git diff --staged --quiet || git commit -m "Update Pegasas TOP 5 $(date -u +%Y-%m-%d)"
+          git rebase -X theirs origin/main
           git push

@@ -1,417 +1,465 @@
-(function() {
+(function () {
   'use strict';
 
   var CONFIG = {
-    presetAmounts: [15, 20, 50, 100, 200, 300],
-    defaultAmount: 20,
-    kitaSumaText: 'Kita suma?',
-    depositPath: '/deposit',
-    checkInterval: 300,
-    maxAttempts: 60
+    maxGamesBar: 5,
+    titleRecentlyPlayed: 'Paskutiniai lošti',
+    checkInterval: 500,
+    maxAttempts: 60,
+    barParentSelector: '.casino-page',
+    barInsertBeforeSelector: '.live-casino-page__item',
   };
 
-  var state = {
-    selectedAmount: CONFIG.defaultAmount,
-    isCustomVisible: false,
-    customValue: '',
-    hasError: false
-  };
+  var CONFIG_FALLBACK_GAMES = [
+    {
+      name: 'Big Bass Splash',
+      url: '/slots-games/pragmatic-play-big-bass-splash/real',
+      image:
+        'https://1855256537.rsc.cdn77.org/images/games/provider-id-116/PPNBigBassSplash@2x.jpg',
+    },
+    {
+      name: 'Book of Dead',
+      url: '/slots-games/play-n-go-book-of-dead/real',
+      image:
+        'https://1855256537.rsc.cdn77.org/images/games/provider-id-3/PGBookOfDead@2x.jpg',
+    },
+    {
+      name: 'Crazy Time',
+      url: '/slots-games/amusnet-fruity-time/real',
+      image:
+        'https://1855256537.rsc.cdn77.org/images/games/provider-id-95/EGTFruityTime@2x.jpg',
+    },
+    {
+      name: 'Gates of Olympus',
+      url: '/slots-games/pragmatic-play-gates-of-olympus/real',
+      image:
+        'https://1855256537.rsc.cdn77.org/images/games/provider-id-116/PPNGatesofOlympus@2x.jpg',
+    },
+    {
+      name: 'Shinning Crown',
+      url: '/slots-games/amusnet-shining-crown/real',
+      image:
+        'https://1855256537.rsc.cdn77.org/images/games/provider-id-95/EGTShiningCrown@2x.jpg',
+    },
+  ];
 
-  var isFirstInject = true;
-  var mainObserver = null;
+  var isInitialized = false;
+  var routeObserver = null;
+  var bodyClassObserver = null;
+  var cachedBarGames = null;
+  var cachedBarElement = null;
+  var barProtectionObserver = null;
+  var isFetchingBar = false;
 
-  // --- Helpers ---
-
-  function log() {}
-
-  function resizeCustomInput(el) {
-    if (window.innerWidth > 768) return;
-    var sizer = document.getElementById('dep-var-sizer');
-    if (!sizer) {
-      sizer = document.createElement('span');
-      sizer.id = 'dep-var-sizer';
-      sizer.style.cssText = 'position:absolute;top:-9999px;left:-9999px;visibility:hidden;font:400 14px Inter,sans-serif;white-space:pre;';
-      document.body.appendChild(sizer);
-    }
-    sizer.textContent = el.value;
-    el.style.width = Math.min(220, Math.max(88, sizer.offsetWidth + 24)) + 'px';
+  function log() {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift('[7bet]');
+    console.log.apply(console, args);
   }
 
   function escapeHtml(str) {
     var div = document.createElement('div');
-    div.appendChild(document.createTextNode(String(str)));
+    div.appendChild(document.createTextNode(str));
     return div.innerHTML;
   }
 
-  function setNativeValue(input, value) {
-    try {
-      var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-      setter.call(input, value);
-    } catch (e) {
-      input.value = value;
-    }
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  }
+  // --- Frosmo Helpers ---
 
-  // --- Selectors ---
-
-  function getAmountInput() {
-    // After injection, original input is marked with data-dep-hidden
-    // This prevents accidentally targeting our own injected custom input
-    return document.querySelector('main input[data-dep-hidden="true"]') ||
-           document.querySelector('main input[type="text"]:not([data-dep-var])');
-  }
-
-  function getAmountLabel() {
-    var labels = document.querySelectorAll('label');
-    for (var i = 0; i < labels.length; i++) {
-      if (labels[i].textContent.trim() === 'Įmokos suma') {
-        return labels[i];
-      }
-    }
-    return null;
-  }
-
-  function getInputValuesContainer() {
-    return document.querySelector('.deposit-form__amount .input-values');
-  }
-
-  function isOnDepositPage() {
-    return window.location.pathname === CONFIG.depositPath;
-  }
-
-  // --- Error detection ---
-
-  function checkLabelError() {
-    var field = document.querySelector('.deposit-form__amount');
-    return field ? field.classList.contains('field-error') : false;
-  }
-
-  // --- Variation UI ---
-
-  function buildHTML() {
-    var btnsHtml = CONFIG.presetAmounts.map(function(amount) {
-      var selected = (amount === state.selectedAmount && !state.isCustomVisible);
-      return '<button id="dep-var-btn-' + amount + '" class="dep-var-btn' + (selected ? ' dep-var-btn--selected' : '') +
-        '" type="button" data-dep-amount="' + amount + '">€' + amount + '</button>';
-    }).join('');
-
-    var linkClass = 'dep-var-kita-link' + (state.hasError && state.isCustomVisible ? ' dep-var-kita-link--error' : '');
-    var inputClass = 'dep-var-custom-input' +
-      (state.isCustomVisible ? ' dep-var-custom-input--visible' : '') +
-      (state.hasError && state.isCustomVisible ? ' dep-var-custom-input--error' : '');
-
-    return '<div class="dep-var-wrapper" data-dep-var="injected">' +
-      '<div class="dep-var-buttons-row">' + btnsHtml + '</div>' +
-      '<div class="dep-var-kita-row">' +
-        '<span class="' + linkClass + '" data-dep-var="kita-link">' + escapeHtml(CONFIG.kitaSumaText) + '</span>' +
-        '<input class="' + inputClass + '" data-dep-var="custom-input" type="text" autocomplete="off" value="' + CONFIG.defaultAmount + '">' +
-      '</div>' +
-    '</div>';
-  }
-
-  function updateUI() {
-    var wrapper = document.querySelector('[data-dep-var="injected"]');
-    if (!wrapper) return;
-
-    // Buttons
-    wrapper.querySelectorAll('.dep-var-btn').forEach(function(btn) {
-      var amount = parseInt(btn.getAttribute('data-dep-amount'), 10);
-      var selected = (amount === state.selectedAmount && !state.isCustomVisible);
-      btn.classList.toggle('dep-var-btn--selected', selected);
-    });
-
-    // Kita suma link
-    var kitaLink = wrapper.querySelector('[data-dep-var="kita-link"]');
-    if (kitaLink) {
-      kitaLink.classList.toggle('dep-var-kita-link--error', state.hasError && state.isCustomVisible);
-    }
-
-    // Custom input
-    var customInput = wrapper.querySelector('[data-dep-var="custom-input"]');
-    if (customInput) {
-      customInput.classList.toggle('dep-var-custom-input--visible', state.isCustomVisible);
-      customInput.classList.toggle('dep-var-custom-input--error', state.hasError && state.isCustomVisible);
-      if (!state.isCustomVisible) customInput.style.width = '';
-    }
-  }
-
-  function attachEvents(wrapper) {
-    wrapper.querySelectorAll('.dep-var-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        onPresetClick(parseInt(btn.getAttribute('data-dep-amount'), 10));
-      });
-    });
-
-    var kitaLink = wrapper.querySelector('[data-dep-var="kita-link"]');
-    if (kitaLink) {
-      kitaLink.addEventListener('click', onKitaSumaClick);
-    }
-
-    var customInput = wrapper.querySelector('[data-dep-var="custom-input"]');
-    if (customInput) {
-      customInput.addEventListener('input', function() {
-        resizeCustomInput(customInput);
-        onCustomInputChange(customInput.value);
-      });
-      customInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') onEscape();
-      });
-    }
-  }
-
-  // --- Event handlers ---
-
-  function onPresetClick(amount) {
-    log('Preset selected:', amount);
-    state.selectedAmount = amount;
-    state.isCustomVisible = false;
-    state.customValue = '';
-    state.hasError = false;
-
-    updateUI();
-
-    // setNativeValue fires React's input event which may trigger re-render.
-    // updateUI must run first so selected class is applied before any re-render.
-    var origInput = getAmountInput();
-    if (origInput) setNativeValue(origInput, String(amount));
-  }
-
-  function onKitaSumaClick() {
-    if (state.isCustomVisible) {
-      onEscape();
+  function waitForFrosmo(callback, attempts) {
+    attempts = attempts || 0;
+    if (attempts >= CONFIG.maxAttempts) {
+      log('Frosmo not available after max attempts');
       return;
     }
-    log('Kita suma opened');
-    state.isCustomVisible = true;
-    state.selectedAmount = null;
-    updateUI();
-
-    setTimeout(function() {
-      var customInput = document.querySelector('[data-dep-var="custom-input"]');
-      if (customInput) {
-        customInput.value = String(CONFIG.defaultAmount);
-        resizeCustomInput(customInput);
-        onCustomInputChange(customInput.value);
-        customInput.focus();
-        customInput.select();
+    if (
+      typeof frosmo !== 'undefined' &&
+      frosmo.easy &&
+      frosmo.easy.strategies &&
+      typeof frosmo.easy.strategies.fetch === 'function' &&
+      frosmo.site &&
+      typeof frosmo.site.recentProducts === 'function'
+    ) {
+      log('Frosmo ready (attempt ' + attempts + ')');
+      callback();
+    } else {
+      if (attempts === 0) {
+        log('Waiting for Frosmo...');
       }
-    }, 220);
+      setTimeout(function () {
+        waitForFrosmo(callback, attempts + 1);
+      }, CONFIG.checkInterval);
+    }
   }
 
-  function onCustomInputChange(value) {
-    state.customValue = value;
-    var origInput = getAmountInput();
-    if (origInput) setNativeValue(origInput, value);
-
-    // Update error state based on label color after React processes the value
-    setTimeout(function() {
-      var hasError = checkLabelError();
-      if (hasError !== state.hasError) {
-        state.hasError = hasError;
-        updateUI();
+  function getBrowserRecentIds(maxCount) {
+    try {
+      var recent = frosmo.site.recentProducts();
+      if (Array.isArray(recent) && recent.length > 0) {
+        return recent.slice(0, maxCount).map(function (item) {
+          return typeof item === 'object' && item.id ? item.id : item;
+        });
       }
-    }, 100);
+    } catch (e) {}
+    return [];
   }
 
-  function onEscape() {
-    log('Custom input closed');
-    state.isCustomVisible = false;
-    state.customValue = '';
-    state.hasError = false;
-    state.selectedAmount = CONFIG.defaultAmount;
-
-    updateUI();
-
-    var origInput = getAmountInput();
-    if (origInput) setNativeValue(origInput, String(CONFIG.defaultAmount));
+  function fetchGames(maxCount) {
+    var recentIds = getBrowserRecentIds(maxCount);
+    if (recentIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return frosmo.site.recommendations
+      .getProductApiData(recentIds)
+      .catch(function () {
+        return [];
+      })
+      .then(function (games) {
+        return games.slice(0, maxCount);
+      });
   }
 
-  // --- Injection ---
+  // --- Inline Last Played Bar (always visible, variation) ---
 
-  function injectVariation() {
-    if (document.querySelector('[data-dep-var="injected"]')) return false;
+  function createBarGameCard(product) {
+    var name = product.name || 'Unknown Game';
+    var image =
+      (product.attributes && product.attributes.feedImage) ||
+      (product.attributes && product.attributes.image) ||
+      '';
+    var url = (product.attributes && product.attributes.url) || '#';
+    var thumbHtml = image
+      ? '<img src="' +
+        escapeHtml(image) +
+        '" alt="' +
+        escapeHtml(name) +
+        '" loading="lazy" onerror="this.style.display=\'none\'">'
+      : '<div class="last-played-bar__thumb-placeholder"></div>';
 
-    var label = getAmountLabel();
-    if (!label) {
-      log('Label not found');
+    return (
+      '<div class="last-played-bar__game">' +
+      '<a href="' +
+      escapeHtml(url) +
+      '" class="last-played-bar__game-link">' +
+      '<div class="last-played-bar__thumb">' +
+      thumbHtml +
+      '<div class="last-played-bar__overlay">' +
+      '<span class="last-played-bar__play-btn">Lošti</span>' +
+      '</div>' +
+      '</div>' +
+      '<span class="last-played-bar__name">' +
+      escapeHtml(name) +
+      '</span>' +
+      '</a>' +
+      '</div>'
+    );
+  }
+
+  function createBar(games) {
+    var cardsHtml = games.map(createBarGameCard).join('');
+    return (
+      '<div class="last-played-bar">' +
+      '<div class="last-played-bar__inner">' +
+      '<span class="last-played-bar__title">' +
+      escapeHtml(CONFIG.titleRecentlyPlayed) +
+      '</span>' +
+      '<div class="last-played-bar__games">' +
+      cardsHtml +
+      '</div>' +
+      '</div>' +
+      '</div>'
+    );
+  }
+
+  function removeBar() {
+    if (barProtectionObserver) {
+      barProtectionObserver.disconnect();
+      barProtectionObserver = null;
+    }
+    var bar = document.querySelector('.last-played-bar');
+    if (bar) bar.remove();
+    cachedBarElement = null;
+    cachedBarGames = null;
+  }
+
+  function startBarProtection() {
+    if (barProtectionObserver) return;
+    var parent = document.querySelector(CONFIG.barParentSelector);
+    if (!parent) return;
+    barProtectionObserver = new MutationObserver(function () {
+      if (isLoggedOut()) return;
+      if (document.querySelector('.last-played-bar')) return;
+      if (!cachedBarElement) return;
+      var insertBefore =
+        parent.querySelector(CONFIG.barInsertBeforeSelector) ||
+        document.querySelector(CONFIG.barInsertBeforeSelector);
+      if (!insertBefore || insertBefore.parentNode !== parent) return;
+      parent.insertBefore(cachedBarElement, insertBefore);
+      log('barProtection: bar re-inserted (same element, no image reload)');
+    });
+    barProtectionObserver.observe(parent, { childList: true });
+    log('Bar protection observer active');
+  }
+
+  function insertBar(games) {
+    if (document.querySelector('.last-played-bar')) {
+      log('insertBar: bar already exists');
+      return false;
+    }
+    var parent = document.querySelector(CONFIG.barParentSelector);
+    var insertBefore = document.querySelector(CONFIG.barInsertBeforeSelector);
+    log(
+      'insertBar: parent=' +
+        (parent ? parent.className : 'NOT FOUND') +
+        ', insertBefore=' +
+        (insertBefore ? insertBefore.className : 'NOT FOUND'),
+    );
+    if (!parent || !insertBefore) {
       return false;
     }
 
-    var origInput = getAmountInput();
-    if (!origInput) {
-      log('Input not found');
-      return false;
+    if (barProtectionObserver) {
+      barProtectionObserver.disconnect();
+      barProtectionObserver = null;
     }
 
-    // Find .input-values container (holds all preset amount buttons)
-    var inputValues = getInputValuesContainer();
-    if (!inputValues) {
-      log('input-values container not found');
-      return false;
-    }
-
-    // On first inject only: sync the default amount to React's input.
-    // On re-inject skip setNativeValue — firing a React event causes another re-render loop.
-    if (isFirstInject) {
-      isFirstInject = false;
-      setNativeValue(origInput, String(state.selectedAmount !== null ? state.selectedAmount : CONFIG.defaultAmount));
-    }
-
-    // Hide the original preset buttons container
-    inputValues.setAttribute('data-dep-hidden', 'true');
-    inputValues.style.setProperty('display', 'none', 'important');
-
-    // Hide original input
-    origInput.setAttribute('data-dep-hidden', 'true');
-    origInput.style.setProperty('display', 'none', 'important');
-
-    // Insert our wrapper before .input-values inside .deposit-form__amount
     var temp = document.createElement('div');
-    temp.innerHTML = buildHTML();
-    var wrapper = temp.firstElementChild;
-    inputValues.parentNode.insertBefore(wrapper, inputValues);
-    attachEvents(wrapper);
-
+    temp.innerHTML = createBar(games);
+    var bar = temp.firstElementChild;
+    parent.insertBefore(bar, insertBefore);
+    cachedBarElement = bar;
+    startBarProtection();
+    function startGlow() {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          bar.classList.add('last-played-bar--animate');
+        });
+      });
+    }
+    if (document.readyState === 'complete') {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(startGlow);
+      });
+    } else {
+      window.addEventListener('load', startGlow, { once: true });
+    }
+    log('Last played bar inserted');
     return true;
   }
 
-  function rehideOriginals() {
-    var inputValues = getInputValuesContainer();
-    if (inputValues) {
-      inputValues.style.setProperty('display', 'none', 'important');
-    }
-    var origInput = document.querySelector('main input[data-dep-hidden="true"]');
-    if (origInput) {
-      origInput.style.setProperty('display', 'none', 'important');
-    }
+  function staticGames() {
+    return CONFIG_FALLBACK_GAMES.map(function (g) {
+      return { name: g.name, attributes: { url: g.url, feedImage: g.image } };
+    });
   }
 
-  // --- Observer ---
+  function padWithStatic(games) {
+    var needed = CONFIG.maxGamesBar - games.length;
+    if (needed <= 0) {
+      return games;
+    }
+    var usedUrls = {};
+    games.forEach(function (g) {
+      var url = (g.attributes && g.attributes.url) || '';
+      if (url) usedUrls[url] = true;
+    });
+    var available = staticGames().filter(function (s) {
+      return !usedUrls[(s.attributes && s.attributes.url) || ''];
+    });
+    return games.concat(available.slice(0, needed));
+  }
 
-  function setupObserver() {
-    if (mainObserver) return;
-    var main = document.querySelector('main');
-    if (!main) return;
+  function isLoggedOut() {
+    return document.body.classList.contains('is-logged-out');
+  }
 
-    mainObserver = new MutationObserver(function() {
-      if (!isOnDepositPage()) return;
-
-      // Re-inject if our wrapper was removed by React
-      if (!document.querySelector('[data-dep-var="injected"]')) {
-        log('Wrapper removed, reinjecting');
-        injectVariation();
+  function preloadImage(url) {
+    return new Promise(function (resolve) {
+      if (!url) {
+        resolve(false);
         return;
       }
+      var img = new Image();
+      img.onload = function () {
+        resolve(true);
+      };
+      img.onerror = function () {
+        resolve(false);
+      };
+      img.src = url;
+    });
+  }
 
-      // Ensure originals stay hidden
-      rehideOriginals();
+  function gamesKey(list) {
+    return list
+      .map(function (g) {
+        return (g.attributes && g.attributes.url) || g.name || '';
+      })
+      .join('|');
+  }
 
-      // Sync error state when custom input is active
-      if (state.isCustomVisible) {
-        var hasError = checkLabelError();
-        if (hasError !== state.hasError) {
-          state.hasError = hasError;
-          updateUI();
+  function updateBarGamesInPlace(list) {
+    var bar = cachedBarElement || document.querySelector('.last-played-bar');
+    if (!bar || !document.contains(bar)) return false;
+    if (cachedBarGames && gamesKey(list) === gamesKey(cachedBarGames)) return true;
+    var gamesEl = bar.querySelector('.last-played-bar__games');
+    if (!gamesEl) return false;
+    gamesEl.innerHTML = list.map(createBarGameCard).join('');
+    return true;
+  }
+
+  function fetchAndInsertBar() {
+    log('fetchAndInsertBar called, isLoggedOut=' + isLoggedOut());
+    if (isLoggedOut()) {
+      return;
+    }
+    if (isFetchingBar) {
+      return;
+    }
+    isFetchingBar = true;
+
+    log('fetchAndInsertBar: fetching games...');
+    fetchGames(CONFIG.maxGamesBar)
+      .then(function (games) {
+        var list = padWithStatic(games);
+        var usedUrls = {};
+        list.forEach(function (g) {
+          var url = (g.attributes && g.attributes.url) || '';
+          if (url) usedUrls[url] = true;
+        });
+        var unusedStatics = staticGames().filter(function (s) {
+          return !usedUrls[(s.attributes && s.attributes.url) || ''];
+        });
+        return Promise.all(
+          list.map(function (game, i) {
+            var image =
+              (game.attributes && game.attributes.feedImage) ||
+              (game.attributes && game.attributes.image) ||
+              '';
+            return preloadImage(image).then(function (ok) {
+              if (ok) {
+                return game;
+              }
+              log(
+                'fetchAndInsertBar: image failed for slot ' +
+                  i +
+                  ', replacing with unused static',
+              );
+              return unusedStatics.shift() || game;
+            });
+          }),
+        );
+      })
+      .then(function (list) {
+        isFetchingBar = false;
+        if (isLoggedOut()) return;
+        cachedBarGames = list;
+        if (!updateBarGamesInPlace(list)) {
+          insertBar(list);
+        }
+        log('fetchAndInsertBar: bar updated');
+      })
+      .catch(function (err) {
+        isFetchingBar = false;
+        if (isLoggedOut()) return;
+        log('Bar: error fetching games', err);
+        var fallback = cachedBarGames || staticGames();
+        if (!cachedBarGames) cachedBarGames = fallback;
+        if (!updateBarGamesInPlace(fallback)) {
+          insertBar(fallback);
+        }
+      });
+  }
+
+  function setupBodyClassObserver() {
+    if (bodyClassObserver) return;
+    bodyClassObserver = new MutationObserver(function (mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].attributeName === 'class') {
+          var oldVal = mutations[i].oldValue || '';
+          var hadLoggedOut = oldVal.indexOf('is-logged-out') !== -1;
+          var hasLoggedOut = document.body.classList.contains('is-logged-out');
+          log(
+            'bodyClassObserver: oldVal had is-logged-out=' +
+              hadLoggedOut +
+              ', now isLoggedOut=' +
+              hasLoggedOut,
+          );
+          if (hadLoggedOut && !hasLoggedOut) {
+            log('bodyClassObserver: is-logged-out removed -> fetchAndInsertBar');
+            fetchAndInsertBar();
+          }
+          if (!hadLoggedOut && hasLoggedOut) {
+            log('bodyClassObserver: is-logged-out added -> removeBar');
+            removeBar();
+          }
         }
       }
     });
-
-    // Watch only childList/subtree — attribute watching causes feedback loops.
-    mainObserver.observe(main, { childList: true, subtree: true });
-    log('Observer active');
-  }
-
-  function teardownObserver() {
-    if (mainObserver) {
-      mainObserver.disconnect();
-      mainObserver = null;
-    }
-  }
-
-  // --- SPA navigation ---
-
-  function onNavigate() {
-    if (isOnDepositPage()) {
-      log('Navigated to deposit, (re)starting');
-      // Reset inject state for this visit
-      isFirstInject = true;
-      state.selectedAmount = CONFIG.defaultAmount;
-      state.isCustomVisible = false;
-      state.customValue = '';
-      state.hasError = false;
-      // Re-setup observer on new main element (React may have replaced it)
-      teardownObserver();
-      waitForForm(function() {
-        // Hide original preset buttons immediately before building our wrapper — eliminates flash.
-        var iv = getInputValuesContainer();
-        if (iv) iv.style.setProperty('display', 'none', 'important');
-        injectVariation();
-        setupObserver();
-      });
-    } else {
-      // Left deposit page — tear down so state is clean for next visit
-      teardownObserver();
-      isFirstInject = true;
-    }
-  }
-
-  function patchHistory() {
-    var _push = history.pushState;
-    var _replace = history.replaceState;
-    history.pushState = function() {
-      _push.apply(this, arguments);
-      setTimeout(onNavigate, 0);
-    };
-    history.replaceState = function() {
-      _replace.apply(this, arguments);
-      setTimeout(onNavigate, 0);
-    };
-    window.addEventListener('popstate', function() {
-      setTimeout(onNavigate, 0);
+    bodyClassObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+      attributeOldValue: true,
     });
+    log('Body class observer active');
   }
 
-  // --- Init ---
-
-  function waitForForm(callback) {
-    if (!isOnDepositPage()) return;
-
-    function isReady() {
-      return getAmountInput() && getAmountLabel() && getInputValuesContainer();
-    }
-
-    if (isReady()) {
-      callback();
+  function setupRouteObserver() {
+    if (routeObserver) {
       return;
     }
-
-    // MutationObserver fires the instant React adds the form elements —
-    // no polling delay, so the original layout has no time to flash.
-    var observer = new MutationObserver(function() {
-      if (!isOnDepositPage()) { observer.disconnect(); return; }
-      if (isReady()) {
-        observer.disconnect();
-        callback();
+    routeObserver = new MutationObserver(function (mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        var nodes = mutations[i].addedNodes;
+        for (var j = 0; j < nodes.length; j++) {
+          var node = nodes[j];
+          if (node.nodeType !== 1) {
+            continue;
+          }
+          if (
+            (node.classList &&
+              node.classList.contains('live-casino-page__item')) ||
+            (node.querySelector &&
+              node.querySelector(CONFIG.barInsertBeforeSelector))
+          ) {
+            log(
+              'routeObserver: casino page element detected, isLoggedOut=' +
+                isLoggedOut(),
+            );
+            if (!document.querySelector('.last-played-bar')) {
+              fetchAndInsertBar();
+            }
+            return;
+          }
+        }
       }
     });
-    var target = document.querySelector('main') || document.body;
-    observer.observe(target, { childList: true, subtree: true });
+    routeObserver.observe(document.body, { childList: true, subtree: true });
   }
 
+  function initBar() {
+    log('initBar called, isLoggedOut=' + isLoggedOut());
+    setupRouteObserver();
+    fetchAndInsertBar();
+    waitForFrosmo(function () {
+      log('initBar: Frosmo ready, calling fetchAndInsertBar');
+      fetchAndInsertBar();
+      // retry in case parent selectors weren't ready yet
+      setTimeout(function () {
+        fetchAndInsertBar();
+      }, 600);
+    });
+  }
+
+  // --- Start ---
+
   function start() {
-    patchHistory();
-    if (isOnDepositPage()) {
-      waitForForm(function() {
-        var iv = getInputValuesContainer();
-        if (iv) iv.style.setProperty('display', 'none', 'important');
-        injectVariation();
-        setupObserver();
-      });
-    }
+    if (isInitialized) return;
+    isInitialized = true;
+    log('start: isLoggedOut=' + isLoggedOut());
+
+    setupBodyClassObserver();
+    initBar();
   }
 
   start();
-
 })();

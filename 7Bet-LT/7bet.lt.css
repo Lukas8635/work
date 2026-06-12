@@ -1,153 +1,480 @@
-/* 7bet.lt — deposit variation styles */
+/* 7bet.lt — A/B variation styles */
 
-/* === Wrapper === */
-.dep-var-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  order: 5;
-  margin-bottom: 10px;
-}
+/* =============================================
+   INLINE LAST PLAYED BAR (always-visible)
+   Injected before .live-casino-page__item
+   inside .casino-page
+   ============================================= */
 
-.deposit-container .deposit-form__amount--children--empty .input-underline {
-  display: none !important;
-}
-/* === Preset Buttons Row === */
-.dep-var-buttons-row {
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
+.last-played-bar {
+  position: relative;
+  margin: 16px auto;
+  max-width: calc(1072px);
+
   width: 100%;
 }
-.dep-var-btn {
-  flex: 1 0 0;
-  height: 48px;
-  background: #21232c;
-  color: #ffffff;
-  border: 1px solid #21232c;
+
+.last-played-bar::before,
+.last-played-bar::after {
+  content: '';
+  display: block;
+  position: absolute;
+  border-radius: 2px;
+  z-index: -1;
+  box-shadow:
+    rgb(24, 174, 98) 0px 0px 15px 3px,
+    rgba(24, 174, 98, 0.5) 0px 0px 15px 3px;
+  height: calc(50% - 0.4rem);
+  width: calc(50% - 0.4rem);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.last-played-bar::before {
+  animation: half-yellow-shadow 8s infinite ease;
+  animation-play-state: paused;
+  top: 0.4rem;
+  left: 0.4rem;
+}
+
+.last-played-bar::after {
+  animation: half-cyan-shadow 8s infinite ease;
+  animation-play-state: paused;
+  bottom: 0.4rem;
+  right: 0.4rem;
+}
+
+.last-played-bar--animate::before,
+.last-played-bar--animate::after {
+  animation-play-state: running;
+  opacity: 1;
+}
+
+.last-played-bar__inner {
+  position: relative;
+  z-index: 1;
   border-radius: 4px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 16px;
-  cursor: pointer;
-  padding: 16px 8px;
-  white-space: nowrap;
-  transition: 0.2s;
-  width: 100%;
-  min-width: auto;
-}
-
-.dep-var-btn:hover {
-  border-color: #18ae62;
-}
-
-/* €20 is always slightly wider than other buttons (ratio ~100:61) */
-.dep-var-btn[data-dep-amount='20'] {
-  flex: 1.64 0 0;
-}
-
-.dep-var-btn--selected {
-  border-color: #18ae62;
-}
-
-/* === Kita Suma Row === */
-.dep-var-kita-row {
+  background: #1c1e26;
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 48px;
-  align-self: flex-start;
+  gap: 40px;
+  padding: 18px;
 }
 
-.dep-var-kita-link {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  color: #898fa9;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
+.last-played-bar__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #ffffff;
   white-space: nowrap;
   flex-shrink: 0;
-  line-height: normal;
-  transition: color 0.15s ease;
-  user-select: none;
 }
 
-.dep-var-kita-link:hover {
-  color: #aab0c4;
-}
-
-.dep-var-kita-link--error {
-  color: #ff4b4b !important;
-}
-
-/* === Custom Amount Input === */
-.dep-var-custom-input {
-  height: 48px;
-  text-align: center;
-  background: #21232c;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  color: #ffffff;
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: normal;
-  padding: 10px 9px;
-  outline: none;
-  width: 0;
+.last-played-bar__games {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  align-items: flex-start;
   min-width: 0;
-  opacity: 0;
-  pointer-events: none;
+}
+
+.last-played-bar__game {
+  flex: 1;
+  min-width: 0;
+}
+
+.last-played-bar__game-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.last-played-bar__thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 500 / 360;
+  border-radius: 4px;
   overflow: hidden;
-  flex-shrink: 0;
-  transition:
-    width 0.2s ease,
-    opacity 0.2s ease,
-    border-color 0.15s ease;
+  background: #2a2d3a;
 }
 
-.dep-var-custom-input--visible {
-  width: 210px;
+.last-played-bar__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.last-played-bar__thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #2a2d3a;
+}
+
+.last-played-bar__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 25, 31, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+}
+
+.last-played-bar__game-link:hover .last-played-bar__overlay {
   opacity: 1;
-  pointer-events: auto;
-  overflow: visible;
 }
 
-.dep-var-custom-input--error {
-  border-color: #ff4b4b;
+.last-played-bar__play-btn {
+  background: #18ae62;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 12px;
+  padding: 12px !important;
+  min-width: 6.4rem;
+  text-align: center;
+  border-radius: 4px;
 }
 
-.dep-var-custom-input:focus {
-  border-color: rgba(255, 255, 255, 0.12);
+.last-played-bar__name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dep-var-custom-input--error:focus {
-  border-color: #ff4b4b;
+/* =============================================
+   DEPOSIT NOTIFICATION OVERLAY (existing)
+   Fixed panel top-right, triggered by deposit
+   ============================================= */
+
+.last-played-section {
+  position: fixed !important;
+  top: 9.5px !important;
+  right: 0px !important;
+  width: 460px !important;
+  z-index: 9999 !important;
+  border-radius: 4px;
+  border: 1.5px solid #18ae62;
+  background: #f3f3fb;
+  box-shadow: 0 0 20px 0 rgba(24, 174, 98, 0.8);
 }
 
-/* === Mobile === */
+.last-played-notification {
+  display: flex;
+  align-items: stretch;
+  height: 47px;
+}
+
+.last-played-notification-icon {
+  background: #18ae62;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.last-played-notification-content {
+  background: #1c1e26;
+  border-bottom: 1.5px solid #18ae62;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  flex: 1;
+  min-width: 0;
+  border-top-right-radius: 3px;
+}
+
+.last-played-notification-text {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: normal;
+  color: #ffffff;
+  flex: 1;
+}
+
+.last-played-notification-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  padding-top: 0;
+  margin-top: -12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.last-played-notification-close:hover {
+  opacity: 1;
+}
+
+.last-played-body {
+  background: #f3f3fb;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+  border-radius: 0 0 4px 4px;
+}
+
+.last-played-header {
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.last-played-title {
+  font-weight: 700;
+  font-size: 12px;
+  line-height: normal;
+  color: #2b2e3b;
+  text-transform: uppercase;
+}
+
+.last-played-games {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding-bottom: 20px;
+}
+
+.last-played-card {
+  flex: 0 0 calc(25% - 12px);
+  min-width: 0;
+}
+
+.last-played-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.last-played-card-thumb {
+  position: relative;
+  height: 75px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #2a2d3a;
+}
+
+.last-played-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.last-played-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(24, 25, 31, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+}
+
+.last-played-card-link:hover .last-played-card-overlay {
+  opacity: 1;
+}
+
+.last-played-play-btn {
+  background: #18ae62;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.last-played-card-name {
+  font-weight: 500;
+  font-size: 12px;
+  line-height: normal;
+  color: #3a3e4e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1090px) {
+  .last-played-bar {
+    margin-left: 20px;
+    margin-right: 20px;
+    max-width: fit-content;
+  }
+}
+
+@keyframes half-yellow-shadow {
+  0% {
+    top: 0.4rem;
+    left: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+  16.66% {
+    top: 0.4rem;
+    left: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(100% - 0.8rem);
+  }
+  32.32% {
+    top: 0.4rem;
+    left: calc(50% - 0.4rem);
+    height: calc(50% - 0.4rem);
+    width: 50%;
+  }
+  49.98% {
+    top: 50%;
+    left: 50%;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+  66.64% {
+    top: 50%;
+    left: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(100% - 0.8rem);
+  }
+  83.3% {
+    top: 50%;
+    left: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+  100% {
+    top: 0.4rem;
+    left: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+}
+
+@keyframes half-cyan-shadow {
+  0% {
+    bottom: 0.4rem;
+    right: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+  16.66% {
+    bottom: 0.4rem;
+    right: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(100% - 0.8rem);
+  }
+  32.32% {
+    bottom: 0.4rem;
+    right: calc(50% - 0.4rem);
+    height: calc(50% - 0.4rem);
+    width: 50%;
+  }
+  49.98% {
+    bottom: 50%;
+    right: 50%;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+  66.64% {
+    bottom: 50%;
+    right: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(100% - 0.8rem);
+  }
+  83.3% {
+    bottom: 50%;
+    right: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+  100% {
+    bottom: 0.4rem;
+    right: 0.4rem;
+    height: calc(50% - 0.4rem);
+    width: calc(50% - 0.4rem);
+  }
+}
+
 @media (max-width: 768px) {
-  .dep-var-btn {
-    flex: 1 0 0;
-    width: auto;
-    padding: 10px 9px;
+  .last-played-bar__inner {
+    gap: 16px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
   }
 
-  /* €20 stays ~1.64x wider than others at all mobile widths */
-  .dep-var-btn[data-dep-amount='20'] {
-    flex: 2;
+  .last-played-bar__title {
+    font-size: 14px;
+    width: 100%;
   }
 
-  .dep-var-btn[data-dep-amount='200'],
-  .dep-var-btn[data-dep-amount='300'] {
-    display: none;
+  .last-played-bar__games {
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
   }
 
-  .dep-var-custom-input--visible {
-    width: 88px;
+  .last-played-bar__game {
+    flex: 0 0 100px;
   }
+
+  .last-played-bar__name {
+    font-size: 12px;
+  }
+
+  .last-played-section {
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .last-played-body {
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .last-played-games {
+    gap: 12px;
+    padding-bottom: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .last-played-card {
+    flex: 0 0 80px;
+  }
+
+  .last-played-card-thumb {
+    height: 62px;
+  }
+
+  .last-played-card-name {
+    font-size: 11px;
+  }
+}
+.casino-page__item.frosmo_inline {
+  display: none !important;
 }

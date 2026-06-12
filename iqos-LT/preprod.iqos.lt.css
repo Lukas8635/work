@@ -1,77 +1,75 @@
-/* Stock Indicator Styles */
+/* Label badge - in normal flow at top of HS card */
+.wc-label {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: normal;
+  color: #34303d;
+  margin: 16px 0px 0px 16px;
+  max-width: max-content;
+  white-space: nowrap;
+}
+.summer a.devices-block-link{
+  justify-content: unset!important;
+  align-items: unset!important;
 
-/* Base stock indicator container */
-.stock-indicator {
+}
+.wc-label--light {
+  background: #ffffff;
+}
+
+.wc-label--teal {
+  background: #00d1d2;
+}
+
+/* Feature tags container */
+.wc-tags {
   display: flex;
+  flex-wrap: wrap;
+  align-content: center;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+/* Individual tag chip */
+.wc-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5b052;
+  color: #34303d;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
   line-height: normal;
-  margin: 9.5px 0;
+  white-space: nowrap;
 }
 
-/* Stock indicator dot */
-.stock-indicator__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
+/* Learn more - lives inside .wc-tags flex row */
+.wc-learn-more {
+  display: inline-block;
+  font-size: 11px;
+  color: #34303d;
+  text-decoration: underline;
+  padding-left: 8px;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-/* In stock - green */
-.stock-indicator--in-stock .stock-indicator__dot {
-  background-color: #00D26A;
+/* Device card - w2 expands to fill, w3 hidden */
+#discover-iluma-i-one .txt-wrapper-2,
+#discover-iluma-i .txt-wrapper-2,
+#discover-iluma-i-prime .txt-wrapper-2 {
+  flex: 1;
 }
 
-.stock-indicator--in-stock .stock-indicator__text {
-  color: #fff;
-}
-
-/* Limited stock - orange */
-.stock-indicator--limited-stock .stock-indicator__dot {
-  background-color: #FF8C00;
-}
-
-.stock-indicator--limited-stock .stock-indicator__text {
-  color: #fff;
-}
-
-/* Out of stock - red */
-.stock-indicator--out-of-stock .stock-indicator__dot {
-  background-color: #E63946;
-}
-
-.stock-indicator--out-of-stock .stock-indicator__text {
-  color: #E63946;
-}
-
-/* Homepage specific styles - darker background cards */
-.homepage-product-card .stock-indicator__text {
-  color: #fff;
-}
-
-/* PDP specific styles */
-.pdp-stock-indicator {
-  margin-top: 12px;
-  margin-bottom: 8px;
-}
-
-.pdp-stock-indicator .stock-indicator__text {
-  font-size: 14px;
-}
-
-/* Animation for stock indicator appearance */
-.stock-indicator {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Add to cart button - inherits .btn base styles */
+.wc-atc {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
 }

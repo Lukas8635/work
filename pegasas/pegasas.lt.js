@@ -31,31 +31,31 @@
     },
     {
       id: 2,
+      title: "Povandeninis fotoaparatas SUNNYLIFE Camera Pastel Gelato (35mm juosta, nepridedama)",
+      authors: "",
+      href: "https://www.pegasas.lt/povandeninis-fotoaparatas-sunnylife-camera-pastel-gelato-35mm-juosta-nepridedama-5521079/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005521079-f-1-5-1-f15127c68342cb4f819ceb817c961ea750a3653d_9339296063293_3_.jpg?op=resize&q=80&w=188"
+    },
+    {
+      id: 3,
       title: "Angelo kumštis. Serijos „Nerealusis Leonas“ antra knyga",
       authors: "Jukka Behm",
       href: "https://www.pegasas.lt/angelo-kumstis-serijos-nerealusis-leonas-antra-knyga-1115199/",
       img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115199-e-e-c-4-eec4070668769f6a7d9940dfc6bb9f7cb51fff55_angelo_kumstis.jpg?op=resize&q=80&w=188"
     },
     {
-      id: 3,
+      id: 4,
       title: "Kvepalai BELLAVITA Mango, 100 ml",
       authors: "",
       href: "https://www.pegasas.lt/kvepalai-bellavita-mango-100-ml-5786458/",
       img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786458-b-3-5-0-b35030c6bd5c9c38dda39f13c43f7e1c365c1253_6295199067734_1.jpg?op=resize&q=80&w=188"
     },
     {
-      id: 4,
+      id: 5,
       title: "Pliušinis žaislas kamuolys JELLYCAT Amuseables Football - Blue and Orange",
       authors: "",
       href: "https://www.pegasas.lt/pliusinis-zaislas-kamuolys-jellycat-amuseables-football-blue-and-orange-5786145/",
       img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786145-9-5-3-5-95356c6abc7eff851ff59e8ca846ac47afe60112_670983170986.jpg?op=resize&q=80&w=188"
-    },
-    {
-      id: 5,
-      title: "Povandeninis fotoaparatas SUNNYLIFE Camera Pastel Gelato (35mm juosta, nepridedama)",
-      authors: "",
-      href: "https://www.pegasas.lt/povandeninis-fotoaparatas-sunnylife-camera-pastel-gelato-35mm-juosta-nepridedama-5521079/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005521079-f-1-5-1-f15127c68342cb4f819ceb817c961ea750a3653d_9339296063293_3_.jpg?op=resize&q=80&w=188"
     }
   ];
 

@@ -24,38 +24,38 @@
   var FALLBACK_BOOKS = [
     {
       id: 1,
-      title: "Futbolo superžvaigždės. Ronaldo",
-      authors: "Simon Mugford",
-      href: "https://www.pegasas.lt/futbolo-superzvaigzdes-ronaldo-1115278/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115278-1-e-7-f-1e7fac0a9f5352d6fe613239c723849fe116a115_futbolo_superzvaigzdes1_ronaldo.jpg?op=resize&q=80&w=188"
+      title: "Bet kuriuo kitu vardu",
+      authors: "Jodi Picoult",
+      href: "https://www.pegasas.lt/bet-kuriuo-kitu-vardu-1114782/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001114782-b-0-d-6-b0d61d25c80b0420d66d69792f0e699ae084fa93_bet_kurio_kitu_vardu.jpg?op=resize&q=80&w=188"
     },
     {
       id: 2,
-      title: "Povandeninis fotoaparatas SUNNYLIFE Camera Pastel Gelato (35mm juosta, nepridedama)",
-      authors: "",
-      href: "https://www.pegasas.lt/povandeninis-fotoaparatas-sunnylife-camera-pastel-gelato-35mm-juosta-nepridedama-5521079/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005521079-f-1-5-1-f15127c68342cb4f819ceb817c961ea750a3653d_9339296063293_3_.jpg?op=resize&q=80&w=188"
+      title: "Futbolo superžvaigždės. Messi",
+      authors: "Simon Mugford",
+      href: "https://www.pegasas.lt/futbolo-superzvaigzdes-messi-1115169/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115169-3-8-6-d-386d027f305b8a76a4c82274c9e154034ba8b8ab_futbolo_superzvaigzdes2_messi.jpg?op=resize&q=80&w=188"
     },
     {
       id: 3,
-      title: "Angelo kumštis. Serijos „Nerealusis Leonas“ antra knyga",
-      authors: "Jukka Behm",
-      href: "https://www.pegasas.lt/angelo-kumstis-serijos-nerealusis-leonas-antra-knyga-1115199/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115199-e-e-c-4-eec4070668769f6a7d9940dfc6bb9f7cb51fff55_angelo_kumstis.jpg?op=resize&q=80&w=188"
+      title: "Lietuvos futbolo rinktinės marškinėliai, L",
+      authors: "",
+      href: "https://www.pegasas.lt/lietuvos-futbolo-rinktines-marskineliai-l-5786884/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786884-d-7-7-c-d77c3d3cb8f68d4982b2e1053892360a82c423f1_lietuvosrinktinesmarskineliai2024_202.jpeg?op=resize&q=80&w=188"
     },
     {
       id: 4,
-      title: "Kvepalai BELLAVITA Mango, 100 ml",
+      title: "Gertuvė Kuromi, 750 ml",
       authors: "",
-      href: "https://www.pegasas.lt/kvepalai-bellavita-mango-100-ml-5786458/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786458-b-3-5-0-b35030c6bd5c9c38dda39f13c43f7e1c365c1253_6295199067734_1.jpg?op=resize&q=80&w=188"
+      href: "https://www.pegasas.lt/gertuve-kuromi-750-ml-5785835/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005785835-d-5-b-5-d5b551076958853fc6d2134e67f816f4ee1450c4_5907360015246__1_.png?op=resize&q=80&w=188"
     },
     {
       id: 5,
-      title: "Pliušinis žaislas kamuolys JELLYCAT Amuseables Football - Blue and Orange",
-      authors: "",
-      href: "https://www.pegasas.lt/pliusinis-zaislas-kamuolys-jellycat-amuseables-football-blue-and-orange-5786145/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786145-9-5-3-5-95356c6abc7eff851ff59e8ca846ac47afe60112_670983170986.jpg?op=resize&q=80&w=188"
+      title: "Placebo: RE:CREATED 2LP",
+      authors: "Placebo",
+      href: "https://www.pegasas.lt/placebo-re-created-2lp-5785762/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005785762-6-8-3-4-683455cdd2a314f724b59f438b4fffc469138f25_505616718357.jpeg?op=resize&q=80&w=188"
     }
   ];
 

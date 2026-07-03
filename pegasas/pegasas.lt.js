@@ -25,14 +25,14 @@
     {
       id: 1,
       title: "Futbolo superžvaigždės. Messi",
-      authors: "",
+      authors: "Simon Mugford",
       href: "https://www.pegasas.lt/futbolo-superzvaigzdes-messi-1115169/",
       img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115169-3-8-6-d-386d027f305b8a76a4c82274c9e154034ba8b8ab_futbolo_superzvaigzdes2_messi.jpg?op=resize&q=80&w=188"
     },
     {
       id: 2,
       title: "Bet kuriuo kitu vardu",
-      authors: "",
+      authors: "Jodi Picoult",
       href: "https://www.pegasas.lt/bet-kuriuo-kitu-vardu-1114782/",
       img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001114782-b-0-d-6-b0d61d25c80b0420d66d69792f0e699ae084fa93_bet_kurio_kitu_vardu.jpg?op=resize&q=80&w=188"
     },
@@ -53,7 +53,7 @@
     {
       id: 5,
       title: "Placebo: RE:CREATED 2LP",
-      authors: "",
+      authors: "Placebo",
       href: "https://www.pegasas.lt/placebo-re-created-2lp-5785762/",
       img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005785762-6-8-3-4-683455cdd2a314f724b59f438b4fffc469138f25_505616718357.jpeg?op=resize&q=80&w=188"
     }

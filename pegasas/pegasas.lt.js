@@ -24,38 +24,38 @@
   var FALLBACK_BOOKS = [
     {
       id: 1,
-      title: "Bet kuriuo kitu vardu",
-      authors: "Jodi Picoult",
-      href: "https://www.pegasas.lt/bet-kuriuo-kitu-vardu-1114782/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001114782-b-0-d-6-b0d61d25c80b0420d66d69792f0e699ae084fa93_bet_kurio_kitu_vardu.jpg?op=resize&q=80&w=188"
+      title: "Olivia Rodrigo: You Seem Pretty Sad For A Girl So In Love LP",
+      authors: "Olivia Rodrigo",
+      href: "https://www.pegasas.lt/olivia-rodrigo-you-seem-pretty-sad-for-a-girl-so-in-love-lp-5785458/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005785458-3-7-6-6-37660c6c3f0e4791fdaf290d5c639da9ac207b16_199957611336.jpg?op=resize&q=80&w=188"
     },
     {
       id: 2,
-      title: "Futbolo superžvaigždės. Messi",
-      authors: "Simon Mugford",
-      href: "https://www.pegasas.lt/futbolo-superzvaigzdes-messi-1115169/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115169-3-8-6-d-386d027f305b8a76a4c82274c9e154034ba8b8ab_futbolo_superzvaigzdes2_messi.jpg?op=resize&q=80&w=188"
+      title: "Kolekcinis pliušinis žaislas REBEL BEAR Movable Street, blind box, įv. rūšys",
+      authors: "",
+      href: "https://www.pegasas.lt/kolekcinis-pliusinis-zaislas-rebel-bear-movable-street-blind-box-iv-rusys-5788643/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005788643-b-4-1-b-b41bdbb1a0d1312436bda8a28b357d94f9a8bf9a_1b6845b9_eaf6_4eba_a425_5a4f8d019704.jpg?op=resize&q=80&w=188"
     },
     {
       id: 3,
-      title: "Lietuvos futbolo rinktinės marškinėliai, L",
+      title: "Termo gertuvė su šiaudeliu BURGA Lemon Tart, 1200 ml",
       authors: "",
-      href: "https://www.pegasas.lt/lietuvos-futbolo-rinktines-marskineliai-l-5786884/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786884-d-7-7-c-d77c3d3cb8f68d4982b2e1053892360a82c423f1_lietuvosrinktinesmarskineliai2024_202.jpeg?op=resize&q=80&w=188"
+      href: "https://www.pegasas.lt/termo-gertuve-su-siaudeliu-burga-lemon-tart-1200-ml-5786007/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005786007-a-4-c-f-a4cffcd37aaa80de7df6a40d1b47595c9f3ad416_4772241528259_1.png?op=resize&q=80&w=188"
     },
     {
       id: 4,
-      title: "Gertuvė Kuromi, 750 ml",
+      title: "Ženkliukų rinkinys KETNIPZ, 4 vnt.",
       authors: "",
-      href: "https://www.pegasas.lt/gertuve-kuromi-750-ml-5785835/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005785835-d-5-b-5-d5b551076958853fc6d2134e67f816f4ee1450c4_5907360015246__1_.png?op=resize&q=80&w=188"
+      href: "https://www.pegasas.lt/zenkliuku-rinkinys-ketnipz-4-vnt-5770581/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005770581-e-a-0-d-ea0d0e46e2e77a214c02103ca856e2f063902fbc_set4p016_01.jpg?op=resize&q=80&w=188"
     },
     {
       id: 5,
-      title: "Placebo: RE:CREATED 2LP",
-      authors: "Placebo",
-      href: "https://www.pegasas.lt/placebo-re-created-2lp-5785762/",
-      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000005785762-6-8-3-4-683455cdd2a314f724b59f438b4fffc469138f25_505616718357.jpeg?op=resize&q=80&w=188"
+      title: "Penkios meilės kalbos vienišiams",
+      authors: "Gary Chapman",
+      href: "https://www.pegasas.lt/penkios-meiles-kalbos-vienisiams-1115242/",
+      img: "https://picfit.pegasas.lt/media/catalog/product/0/0/000000000001115242-2-b-5-7-2b57778677422e4e754c7ad617938fa16c36b016_penkios_meiles_kalbos_vienisiams.jpg?op=resize&q=80&w=188"
     }
   ];
 
